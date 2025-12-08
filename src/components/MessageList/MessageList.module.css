@@ -1,0 +1,56 @@
+.messageList {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--bb-spacing-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--bb-spacing-lg);
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+.messageList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.messageList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.messageList::-webkit-scrollbar-thumb {
+  background: var(--bb-border-color);
+  border-radius: var(--bb-radius-full);
+}
+
+.messageList::-webkit-scrollbar-thumb:hover {
+  background: var(--bb-text-tertiary);
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--bb-text-tertiary);
+  text-align: center;
+  padding: var(--bb-spacing-2xl);
+}
+
+.emptyIcon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--bb-spacing-lg);
+  opacity: 0.5;
+}
+
+.emptyIcon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.emptyText {
+  margin: 0;
+  font-size: var(--bb-font-size-md);
+}
+
