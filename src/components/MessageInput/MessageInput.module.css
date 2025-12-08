@@ -1,0 +1,105 @@
+.inputWrapper {
+  padding: var(--bb-spacing-lg);
+  background: var(--bb-surface-bg);
+  border-top: 1px solid var(--bb-border-color-light);
+}
+
+.inputContainer {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--bb-spacing-sm);
+  padding: var(--bb-spacing-sm) var(--bb-spacing-md);
+  background: var(--bb-surface-secondary);
+  border-radius: var(--bb-radius-xl);
+  border: 1px solid var(--bb-border-color);
+  transition: border-color var(--bb-transition-fast), box-shadow var(--bb-transition-fast);
+}
+
+.inputContainer:focus-within {
+  border-color: var(--bb-accent-color);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.textarea {
+  flex: 1;
+  border: none;
+  background: transparent;
+  resize: none;
+  font-family: var(--bb-font-family);
+  font-size: var(--bb-font-size-md);
+  line-height: var(--bb-line-height);
+  color: var(--bb-text-primary);
+  padding: var(--bb-spacing-sm) 0;
+  min-height: 24px;
+  max-height: 150px;
+}
+
+.textarea::placeholder {
+  color: var(--bb-text-tertiary);
+}
+
+.textarea:focus {
+  outline: none;
+}
+
+.textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.sendButton {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--bb-radius-full);
+  background: var(--bb-primary-color);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bb-text-inverse);
+  transition: background var(--bb-transition-fast), transform var(--bb-transition-fast);
+}
+
+.sendButton:hover:not(:disabled) {
+  background: var(--bb-primary-hover);
+  transform: scale(1.05);
+}
+
+.sendButton:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.sendButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.sendButton:focus-visible {
+  outline: 2px solid var(--bb-accent-color);
+  outline-offset: 2px;
+}
+
+.sendButton svg {
+  width: 18px;
+  height: 18px;
+}
+
+.hint {
+  margin-top: var(--bb-spacing-sm);
+  font-size: var(--bb-font-size-xs);
+  color: var(--bb-text-tertiary);
+  text-align: center;
+}
+
+.hint kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  font-family: var(--bb-font-family);
+  font-size: var(--bb-font-size-xs);
+  background: var(--bb-surface-tertiary);
+  border-radius: 4px;
+  border: 1px solid var(--bb-border-color);
+}
+
