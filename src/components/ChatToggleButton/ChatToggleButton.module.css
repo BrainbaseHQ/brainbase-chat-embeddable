@@ -1,0 +1,60 @@
+.toggleButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--bb-toggle-size);
+  height: var(--bb-toggle-size);
+  border-radius: var(--bb-radius-full);
+  background: linear-gradient(135deg, var(--bb-primary-color) 0%, #2d2d5a 100%);
+  border: none;
+  cursor: pointer;
+  box-shadow: var(--bb-shadow-lg);
+  transition: transform var(--bb-transition-normal), box-shadow var(--bb-transition-normal);
+  color: var(--bb-text-inverse);
+}
+
+.toggleButton:hover {
+  transform: scale(1.05);
+  box-shadow: var(--bb-shadow-xl);
+}
+
+.toggleButton:active {
+  transform: scale(0.98);
+}
+
+.toggleButton:focus-visible {
+  outline: 2px solid var(--bb-accent-color);
+  outline-offset: 2px;
+}
+
+.icon {
+  width: 28px;
+  height: 28px;
+}
+
+.agentLogo {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--bb-radius-full);
+  object-fit: cover;
+}
+
+.unreadBadge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--bb-radius-full);
+  background: #ef4444;
+  color: white;
+  font-size: var(--bb-font-size-xs);
+  font-weight: var(--bb-font-weight-bold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
