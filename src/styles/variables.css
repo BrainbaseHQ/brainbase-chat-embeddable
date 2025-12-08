@@ -1,0 +1,96 @@
+/* Brainbase Chat Widget - CSS Variables for Theming */
+
+:root {
+  /* Primary colors - customizable via props */
+  --bb-primary-color: #1a1a2e;
+  --bb-primary-hover: #16162a;
+  --bb-primary-light: rgba(26, 26, 46, 0.1);
+
+  /* Accent color */
+  --bb-accent-color: #6366f1;
+  --bb-accent-hover: #5558e3;
+
+  /* Surface colors */
+  --bb-surface-bg: #ffffff;
+  --bb-surface-secondary: #f8f9fb;
+  --bb-surface-tertiary: #f1f3f9;
+
+  /* Text colors */
+  --bb-text-primary: #1a1a2e;
+  --bb-text-secondary: #6b7280;
+  --bb-text-tertiary: #9ca3af;
+  --bb-text-inverse: #ffffff;
+
+  /* Message colors */
+  --bb-user-message-bg: var(--bb-primary-color);
+  --bb-user-message-text: var(--bb-text-inverse);
+  --bb-assistant-message-bg: var(--bb-surface-secondary);
+  --bb-assistant-message-text: var(--bb-text-primary);
+
+  /* Borders */
+  --bb-border-color: #e5e7eb;
+  --bb-border-color-light: #f1f3f9;
+
+  /* Shadows */
+  --bb-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --bb-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --bb-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
+  --bb-shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.16);
+
+  /* Border radius */
+  --bb-radius-sm: 8px;
+  --bb-radius-md: 12px;
+  --bb-radius-lg: 16px;
+  --bb-radius-xl: 20px;
+  --bb-radius-full: 9999px;
+
+  /* Spacing */
+  --bb-spacing-xs: 4px;
+  --bb-spacing-sm: 8px;
+  --bb-spacing-md: 12px;
+  --bb-spacing-lg: 16px;
+  --bb-spacing-xl: 20px;
+  --bb-spacing-2xl: 24px;
+
+  /* Typography */
+  --bb-font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --bb-font-size-xs: 11px;
+  --bb-font-size-sm: 13px;
+  --bb-font-size-md: 14px;
+  --bb-font-size-lg: 16px;
+  --bb-font-size-xl: 18px;
+  --bb-font-size-2xl: 24px;
+  --bb-font-weight-normal: 400;
+  --bb-font-weight-medium: 500;
+  --bb-font-weight-semibold: 600;
+  --bb-font-weight-bold: 700;
+  --bb-line-height: 1.5;
+
+  /* Animation */
+  --bb-transition-fast: 150ms ease;
+  --bb-transition-normal: 200ms ease;
+  --bb-transition-slow: 300ms ease;
+
+  /* Widget dimensions */
+  --bb-widget-width: 400px;
+  --bb-widget-height: 600px;
+  --bb-widget-max-height: 85vh;
+  --bb-toggle-size: 60px;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root[data-bb-theme="auto"] {
+    --bb-surface-bg: #1a1a2e;
+    --bb-surface-secondary: #252542;
+    --bb-surface-tertiary: #2d2d4a;
+    --bb-text-primary: #f8f9fb;
+    --bb-text-secondary: #9ca3af;
+    --bb-text-tertiary: #6b7280;
+    --bb-border-color: #3d3d5c;
+    --bb-border-color-light: #2d2d4a;
+    --bb-assistant-message-bg: var(--bb-surface-secondary);
+    --bb-assistant-message-text: var(--bb-text-primary);
+  }
+}
+
