@@ -23,7 +23,7 @@ type Story = StoryObj<typeof ChatWidget>;
 export const Default: Story = {
   args: {
     embedId: 'demo',
-    mockMode: true,
+    mockMode: false,
     defaultOpen: true,
     agentName: 'AI Assistant',
     welcomeMessage:
@@ -93,7 +93,7 @@ export const BottomLeft: Story = {
 // Inline mode (embedded in page)
 export const Inline: Story = {
   args: {
-    embedId: 'demo',
+    embedId: "demo",
     mockMode: true,
     position: 'inline',
     defaultOpen: true,
