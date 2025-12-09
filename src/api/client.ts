@@ -1,24 +1,18 @@
 import type {
   BrainbaseAPIClient,
   DeploymentConfig,
-  StartSessionParams,
   SendMessageParams,
-  EndSessionParams,
 } from '../types';
 
-const DEFAULT_API_URL = 'https://brainbase-monorepo-api.onrender.com';
 const DEFAULT_ENGINE_URL = 'https://whatsapp-based-server.onrender.com';
 
 export function createAPIClient(
-  apiBaseUrl: string = DEFAULT_API_URL,
   engineBaseUrl: string = DEFAULT_ENGINE_URL
 ): BrainbaseAPIClient {
   return {
     async getDeploymentConfig(embedId: string): Promise<DeploymentConfig> {
-      // GET /api/workers/deployments/chat-embed/by-embed/{embedId}
-      const res = await fetch(
-        `${apiBaseUrl}/api/workers/deployments/chat-embed/by-embed/${embedId}`
-      );
+      // GET /chat/config/{embed_id} - Public endpoint on the messaging server
+      const res = await fetch(`${engineBaseUrl}/chat/config/${embedId}`);
 
       if (!res.ok) {
         throw new Error(`Failed to fetch deployment config: ${res.status}`);
@@ -28,9 +22,11 @@ export function createAPIClient(
 
       return {
         embedId: data.embedId,
-        deploymentId: data.id,
-        workerId: data.workerId,
-        flowId: data.flowId,
+        // Note: The public config endpoint doesn't expose internal IDs
+        // These will be resolved server-side when sending messages
+        deploymentId: '',
+        workerId: '',
+        flowId: '',
         welcomeMessage: data.welcomeMessage,
         agentName: data.agentName,
         agentLogoUrl: data.agentLogoUrl,
@@ -39,46 +35,22 @@ export function createAPIClient(
       };
     },
 
-    async startSession(params: StartSessionParams): Promise<void> {
-      // POST /api/workers/{workerId}/deploymentLogs/chat-embed
-      // with event: 'session_started'
-      const res = await fetch(
-        `${apiBaseUrl}/api/workers/${params.workerId}/deploymentLogs/chat-embed`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            event: 'session_started',
-            sessionId: params.sessionId,
-            deploymentId: params.deploymentId,
-            flowId: params.flowId,
-            userAgent: params.userAgent,
-            originUrl: params.originUrl,
-          }),
-        }
-      );
-
-      if (!res.ok) {
-        throw new Error(`Failed to start session: ${res.status}`);
-      }
-    },
-
     async sendMessage(params: SendMessageParams): Promise<ReadableStream<Uint8Array>> {
-      // POST to engine SSE endpoint
-      const res = await fetch(`${engineBaseUrl}/chat`, {
+      // POST /chat/message - SSE streaming endpoint
+      const res = await fetch(`${engineBaseUrl}/chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          session_id: params.sessionId,
-          deployment_id: params.deploymentId,
-          worker_id: params.workerId,
-          flow_id: params.flowId,
+          embed_id: params.embedId,
           message: params.message,
+          session_id: params.sessionId || undefined,
+          metadata: params.metadata,
         }),
       });
 
       if (!res.ok) {
-        throw new Error(`Failed to send message: ${res.status}`);
+        const errorText = await res.text();
+        throw new Error(`Failed to send message: ${res.status} - ${errorText}`);
       }
 
       if (!res.body) {
@@ -86,31 +58,6 @@ export function createAPIClient(
       }
 
       return res.body;
-    },
-
-    async endSession(params: EndSessionParams): Promise<void> {
-      // POST /api/workers/{workerId}/deploymentLogs/chat-embed
-      // with event: 'session_ended'
-      const res = await fetch(
-        `${apiBaseUrl}/api/workers/${params.workerId}/deploymentLogs/chat-embed`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            event: 'session_ended',
-            sessionId: params.sessionId,
-            messages: params.messages,
-            toolCalls: params.toolCalls,
-            messageCount: params.messageCount,
-            startTime: params.startTime,
-            endTime: params.endTime,
-          }),
-        }
-      );
-
-      if (!res.ok) {
-        throw new Error(`Failed to end session: ${res.status}`);
-      }
     },
   };
 }
