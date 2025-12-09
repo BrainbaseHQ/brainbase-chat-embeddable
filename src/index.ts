@@ -34,9 +34,7 @@ export type {
   MessageRole,
   MessageStatus,
   BrainbaseAPIClient,
-  StartSessionParams,
   SendMessageParams,
-  EndSessionParams,
 } from './types';
 
 // Utilities
