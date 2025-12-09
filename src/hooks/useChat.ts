@@ -67,18 +67,9 @@ export function useChat(options: UseChatOptions): UseChatReturn {
       setMessages(stored.messages);
       setToolCalls(stored.toolCalls);
       sessionStartTime.current = stored.startTime;
-    } else if (config.welcomeMessage) {
-      // Show welcome message for new sessions
-      const welcomeMsg: Message = {
-        id: `welcome-${Date.now()}`,
-        role: 'assistant',
-        content: config.welcomeMessage,
-        timestamp: Date.now(),
-        status: 'sent',
-      };
-      setMessages([welcomeMsg]);
     }
-  }, [config.embedId, config.welcomeMessage]);
+    // Note: Welcome message is handled by the engine, not the widget
+  }, [config.embedId]);
 
   // Persist session on changes
   useEffect(() => {
@@ -98,27 +89,15 @@ export function useChat(options: UseChatOptions): UseChatReturn {
 
   const startNewSession = useCallback(async (): Promise<string> => {
     // Session is created server-side, we just reset local state
+    // Welcome message is also handled by the engine
     sessionStartTime.current = Date.now();
     setSessionId(null);
     setMessages([]);
     setToolCalls([]);
     clearSession(config.embedId);
 
-    // Add welcome message if configured
-    if (config.welcomeMessage) {
-      const welcomeMsg: Message = {
-        id: `welcome-${Date.now()}`,
-        role: 'assistant',
-        content: config.welcomeMessage,
-        timestamp: Date.now(),
-        status: 'sent',
-      };
-      setMessages([welcomeMsg]);
-      onMessage?.(welcomeMsg);
-    }
-
     return '';
-  }, [config.embedId, config.welcomeMessage, onMessage]);
+  }, [config.embedId]);
 
   const handleSSEEvent = useCallback(
     (event: SSEEvent, messageId: string, updateSessionId: (id: string) => void) => {
@@ -401,18 +380,7 @@ export function useChat(options: UseChatOptions): UseChatReturn {
     setSessionId(null);
     setMessages([]);
     setToolCalls([]);
-
-    // Add welcome message back if configured
-    if (config.welcomeMessage) {
-      const welcomeMsg: Message = {
-        id: `welcome-${Date.now()}`,
-        role: 'assistant',
-        content: config.welcomeMessage,
-        timestamp: Date.now(),
-        status: 'sent',
-      };
-      setMessages([welcomeMsg]);
-    }
+    // Note: Welcome message is handled by the engine when a new session starts
   }, [
     sessionId,
     config,
