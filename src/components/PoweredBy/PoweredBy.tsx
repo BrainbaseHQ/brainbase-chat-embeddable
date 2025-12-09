@@ -1,8 +1,8 @@
 import React from 'react';
-import styles from './TypingIndicator.module.css';
+import styles from './PoweredBy.module.css';
 
-// Brainbase Labs logo - used as default avatar
-const BrainbaseLogo: React.FC<{ className?: string }> = ({ className }) => (
+// Brainbase Labs logo - inline SVG for reliability (no external dependencies)
+const BrainbaseLabsLogo: React.FC<{ className?: string }> = ({ className }) => (
   <svg
     className={className}
     viewBox="0 0 800 800"
@@ -34,37 +34,24 @@ const BrainbaseLogo: React.FC<{ className?: string }> = ({ className }) => (
       height="270"
       rx="12"
       transform="rotate(45 399.919 209)"
-      fill="white"
+      fill="var(--bb-surface-bg, #ffffff)"
     />
   </svg>
 );
 
-export interface TypingIndicatorProps {
-  agentName?: string;
-  agentLogoUrl?: string;
-}
-
-export const TypingIndicator: React.FC<TypingIndicatorProps> = ({
-  agentName = 'AI',
-  agentLogoUrl,
-}) => {
+export const PoweredBy: React.FC = () => {
   return (
-    <div className={styles.wrapper} role="status" aria-label={`${agentName} is typing`}>
-      <div className={styles.avatar}>
-        {agentLogoUrl ? (
-          <img src={agentLogoUrl} alt={agentName} />
-        ) : (
-          <div className={styles.avatarPlaceholder}>
-            <BrainbaseLogo className={styles.brainbaseLogo} />
-          </div>
-        )}
-      </div>
-      <div className={styles.bubble}>
-        <span className={styles.dot} />
-        <span className={styles.dot} />
-        <span className={styles.dot} />
-      </div>
-    </div>
+    <a
+      href="https://brainbaselabs.com/"
+      target="_blank"
+      rel="noopener noreferrer"
+      className={styles.poweredBy}
+      aria-label="Powered by Brainbase Labs"
+    >
+      <span className={styles.poweredText}>Powered by</span>
+      <BrainbaseLabsLogo className={styles.logo} />
+      <span className={styles.text}>Brainbase Labs</span>
+    </a>
   );
 };
 

@@ -1,0 +1,31 @@
+# Source files
+src/
+.storybook/
+
+# Config files
+*.config.ts
+*.config.js
+tsconfig.json
+tsconfig.node.json
+.eslintrc*
+.prettierrc*
+
+# Development
+.github/
+node_modules/
+storybook-static/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+*.log
+*.tgz
+

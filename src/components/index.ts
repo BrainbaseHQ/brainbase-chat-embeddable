@@ -5,6 +5,7 @@ export { ChatToggleButton } from './ChatToggleButton';
 export { Message } from './Message';
 export { MessageList } from './MessageList';
 export { MessageInput } from './MessageInput';
+export { PoweredBy } from './PoweredBy';
 export { ToolCallDisplay } from './ToolCallDisplay';
 export { TypingIndicator } from './TypingIndicator';
 

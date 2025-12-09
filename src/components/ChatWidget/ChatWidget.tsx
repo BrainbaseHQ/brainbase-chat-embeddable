@@ -71,7 +71,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
               flowId: 'mock-flow',
               primaryColor: primaryColor ?? '#1a1a2e',
               agentName: agentName ?? 'AI Assistant',
-              welcomeMessage: welcomeMessage ?? 'Hello! How can I help you today?',
+              // Note: welcomeMessage is handled by the engine
             });
           }
         }

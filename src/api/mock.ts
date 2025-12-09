@@ -10,7 +10,7 @@ const DEFAULT_MOCK_CONFIG: DeploymentConfig = {
   deploymentId: 'mock-deployment-id',
   workerId: 'mock-worker-id',
   flowId: 'mock-flow-id',
-  welcomeMessage: 'Hello! How can I help you today?',
+  // Note: welcomeMessage is handled by the engine, not the widget
   agentName: 'AI Assistant',
   agentLogoUrl: undefined,
   primaryColor: '#1a1a2e',

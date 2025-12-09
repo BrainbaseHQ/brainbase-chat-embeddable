@@ -1,0 +1,40 @@
+.poweredBy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: var(--bb-spacing-sm) var(--bb-spacing-md);
+  background: var(--bb-surface-secondary);
+  border-top: 1px solid var(--bb-border-color-light);
+  color: var(--bb-text-tertiary);
+  text-decoration: none;
+  font-size: var(--bb-font-size-xs);
+  font-weight: var(--bb-font-weight-medium);
+  transition: color var(--bb-transition-fast);
+}
+
+.poweredBy:hover {
+  color: var(--bb-text-secondary);
+}
+
+.poweredBy:hover .logo {
+  opacity: 0.9;
+}
+
+.poweredText {
+  opacity: 0.7;
+}
+
+.logo {
+  width: 12px;
+  height: 12px;
+  opacity: 0.6;
+  transition: opacity var(--bb-transition-fast);
+  margin-left: 2px;
+}
+
+.text {
+  letter-spacing: 0.01em;
+  font-weight: var(--bb-font-weight-semibold);
+}
+
