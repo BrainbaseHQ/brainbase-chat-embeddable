@@ -7,7 +7,6 @@ import type {
   SSEEvent,
   BrainbaseAPIClient,
 } from '../types';
-import { generateSessionId } from '../utils/generateSessionId';
 import {
   getStoredSession,
   storeSession,
@@ -68,8 +67,18 @@ export function useChat(options: UseChatOptions): UseChatReturn {
       setMessages(stored.messages);
       setToolCalls(stored.toolCalls);
       sessionStartTime.current = stored.startTime;
+    } else if (config.welcomeMessage) {
+      // Show welcome message for new sessions
+      const welcomeMsg: Message = {
+        id: `welcome-${Date.now()}`,
+        role: 'assistant',
+        content: config.welcomeMessage,
+        timestamp: Date.now(),
+        status: 'sent',
+      };
+      setMessages([welcomeMsg]);
     }
-  }, [config.embedId]);
+  }, [config.embedId, config.welcomeMessage]);
 
   // Persist session on changes
   useEffect(() => {
@@ -88,80 +97,71 @@ export function useChat(options: UseChatOptions): UseChatReturn {
   }, [sessionId, messages, toolCalls, config]);
 
   const startNewSession = useCallback(async (): Promise<string> => {
-    const newSessionId = generateSessionId();
+    // Session is created server-side, we just reset local state
     sessionStartTime.current = Date.now();
+    setSessionId(null);
+    setMessages([]);
+    setToolCalls([]);
+    clearSession(config.embedId);
 
-    try {
-      if (mockMode) {
-        await (apiClient as MockAPIClient).startSession();
-      } else {
-        await (apiClient as BrainbaseAPIClient).startSession({
-          sessionId: newSessionId,
-          deploymentId: config.deploymentId,
-          workerId: config.workerId,
-          flowId: config.flowId,
-          userAgent: navigator.userAgent,
-          originUrl: window.location.href,
-        });
-      }
-
-      setSessionId(newSessionId);
-      onSessionStart?.(newSessionId);
-
-      // Add welcome message if configured
-      if (config.welcomeMessage) {
-        const welcomeMsg: Message = {
-          id: `welcome-${Date.now()}`,
-          role: 'assistant',
-          content: config.welcomeMessage,
-          timestamp: Date.now(),
-          status: 'sent',
-        };
-        setMessages([welcomeMsg]);
-        onMessage?.(welcomeMsg);
-      }
-
-      return newSessionId;
-    } catch (err) {
-      const error =
-        err instanceof Error ? err : new Error('Failed to start session');
-      setError(error);
-      onError?.(error);
-      throw error;
+    // Add welcome message if configured
+    if (config.welcomeMessage) {
+      const welcomeMsg: Message = {
+        id: `welcome-${Date.now()}`,
+        role: 'assistant',
+        content: config.welcomeMessage,
+        timestamp: Date.now(),
+        status: 'sent',
+      };
+      setMessages([welcomeMsg]);
+      onMessage?.(welcomeMsg);
     }
-  }, [config, apiClient, mockMode, onSessionStart, onMessage, onError]);
+
+    return '';
+  }, [config.embedId, config.welcomeMessage, onMessage]);
 
   const handleSSEEvent = useCallback(
-    (event: SSEEvent, messageId: string) => {
+    (event: SSEEvent, messageId: string, updateSessionId: (id: string) => void) => {
       switch (event.type) {
-        case 'say':
-        case 'talk': {
-          const data = event.data as { text: string; partial?: boolean };
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === messageId
-                ? {
-                    ...m,
-                    content: data.text,
-                    status: data.partial ? 'streaming' : 'sent',
-                  }
-                : m
-            )
-          );
+        case 'session': {
+          // Session info from server
+          const data = event.data as { session_id: string; is_new: boolean };
+          if (data.session_id) {
+            updateSessionId(data.session_id);
+            if (data.is_new) {
+              sessionStartTime.current = Date.now();
+              onSessionStart?.(data.session_id);
+            }
+          }
           break;
         }
-        case 'function_call': {
+        case 'message': {
+          // Agent message
+          const data = event.data as { content: string; role?: string };
+          if (data.content) {
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === messageId
+                  ? { ...m, content: data.content, status: 'streaming' as const }
+                  : m
+              )
+            );
+          }
+          break;
+        }
+        case 'tool_call': {
+          // Tool/function call
           const data = event.data as {
-            name: string;
-            arguments?: Record<string, unknown>;
+            function: string;
+            content?: string;
+            args?: Record<string, unknown>;
             result?: unknown;
-            status?: string;
           };
 
           setToolCalls((prev) => {
             // Check if this is an update to an existing tool call
             const existingIndex = prev.findIndex(
-              (tc) => tc.name === data.name && tc.status === 'pending'
+              (tc) => tc.name === data.function && tc.status === 'pending'
             );
 
             if (existingIndex !== -1 && data.result !== undefined) {
@@ -173,14 +173,14 @@ export function useChat(options: UseChatOptions): UseChatReturn {
               );
             }
 
-            if (existingIndex === -1 && data.arguments) {
+            if (existingIndex === -1) {
               // Add new tool call
               return [
                 ...prev,
                 {
                   id: `tc-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-                  name: data.name,
-                  arguments: data.arguments,
+                  name: data.function,
+                  arguments: data.args ?? {},
                   status: 'pending' as const,
                   timestamp: Date.now(),
                 },
@@ -189,23 +189,59 @@ export function useChat(options: UseChatOptions): UseChatReturn {
 
             return prev;
           });
+
+          // If tool call has content, also update the message
+          if (data.content) {
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === messageId
+                  ? { ...m, content: data.content as string, status: 'streaming' as const }
+                  : m
+              )
+            );
+          }
           break;
         }
-        case 'completed': {
+        case 'waiting': {
+          // Agent is processing - no action needed
+          break;
+        }
+        case 'done': {
+          // Stream complete
           setMessages((prev) =>
-            prev.map((m) => (m.id === messageId ? { ...m, status: 'sent' } : m))
+            prev.map((m) => (m.id === messageId ? { ...m, status: 'sent' as const } : m))
           );
           break;
         }
+        case 'completed': {
+          // Conversation ended by agent
+          setMessages((prev) =>
+            prev.map((m) => (m.id === messageId ? { ...m, status: 'sent' as const } : m))
+          );
+          // Mark session as completed
+          if (sessionId) {
+            storeSession(config.embedId, {
+              sessionId,
+              deploymentId: config.deploymentId,
+              workerId: config.workerId,
+              flowId: config.flowId,
+              startTime: sessionStartTime.current,
+              messages,
+              toolCalls,
+              status: 'completed',
+            });
+          }
+          break;
+        }
         case 'error': {
-          const data = event.data as { message?: string };
+          const data = event.data as { error?: string };
           setMessages((prev) =>
             prev.map((m) =>
               m.id === messageId
                 ? {
                     ...m,
-                    status: 'error',
-                    content: data.message ?? 'An error occurred',
+                    status: 'error' as const,
+                    content: data.error ?? 'An error occurred',
                   }
                 : m
             )
@@ -214,11 +250,11 @@ export function useChat(options: UseChatOptions): UseChatReturn {
         }
       }
     },
-    []
+    [config, sessionId, messages, toolCalls, onSessionStart]
   );
 
   const processSSEStream = useCallback(
-    async (stream: ReadableStream<Uint8Array>, messageId: string) => {
+    async (stream: ReadableStream<Uint8Array>, messageId: string, updateSessionId: (id: string) => void) => {
       const reader = stream.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
@@ -229,16 +265,21 @@ export function useChat(options: UseChatOptions): UseChatReturn {
           if (done) break;
 
           buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() ?? '';
+          
+          // SSE messages are separated by double newlines
+          while (buffer.includes('\n\n')) {
+            const [message, rest] = buffer.split('\n\n', 2);
+            buffer = rest;
 
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              try {
-                const event = JSON.parse(line.slice(6)) as SSEEvent;
-                handleSSEEvent(event, messageId);
-              } catch {
-                // Ignore parse errors for malformed JSON
+            // Parse SSE data lines
+            for (const line of message.split('\n')) {
+              if (line.startsWith('data: ')) {
+                try {
+                  const event = JSON.parse(line.slice(6)) as SSEEvent;
+                  handleSSEEvent(event, messageId, updateSessionId);
+                } catch {
+                  // Ignore parse errors for malformed JSON
+                }
               }
             }
           }
@@ -253,11 +294,6 @@ export function useChat(options: UseChatOptions): UseChatReturn {
   const sendMessage = useCallback(
     async (content: string): Promise<void> => {
       if (!content.trim()) return;
-
-      let currentSessionId = sessionId;
-      if (!currentSessionId) {
-        currentSessionId = await startNewSession();
-      }
 
       // Add user message
       const userMessage: Message = {
@@ -284,23 +320,26 @@ export function useChat(options: UseChatOptions): UseChatReturn {
       setIsLoading(true);
       setError(null);
 
+      // Create a callback to update session ID when received from server
+      const updateSessionId = (newSessionId: string) => {
+        setSessionId(newSessionId);
+      };
+
       try {
         if (mockMode) {
           // Handle AsyncGenerator (mock mode)
           const generator = (apiClient as MockAPIClient).sendMessage(content);
           for await (const event of generator) {
-            handleSSEEvent(event, assistantMessageId);
+            handleSSEEvent(event, assistantMessageId, updateSessionId);
           }
         } else {
           // Handle ReadableStream (real API)
           const stream = await (apiClient as BrainbaseAPIClient).sendMessage({
-            sessionId: currentSessionId,
-            deploymentId: config.deploymentId,
-            workerId: config.workerId,
-            flowId: config.flowId,
+            embedId: config.embedId,
             message: content,
+            sessionId: sessionId ?? undefined,
           });
-          await processSSEStream(stream, assistantMessageId);
+          await processSSEStream(stream, assistantMessageId, updateSessionId);
         }
 
         // Mark as sent if still streaming
@@ -331,10 +370,9 @@ export function useChat(options: UseChatOptions): UseChatReturn {
     },
     [
       sessionId,
-      startNewSession,
       apiClient,
       mockMode,
-      config,
+      config.embedId,
       handleSSEEvent,
       processSSEStream,
       onMessage,
@@ -343,54 +381,44 @@ export function useChat(options: UseChatOptions): UseChatReturn {
   );
 
   const endCurrentSession = useCallback(async (): Promise<void> => {
+    // Session ending is handled server-side when conversation completes
+    // This just clears local state
     if (!sessionId) return;
 
-    try {
-      if (mockMode) {
-        await (apiClient as MockAPIClient).endSession();
-      } else {
-        await (apiClient as BrainbaseAPIClient).endSession({
-          workerId: config.workerId,
-          sessionId,
-          messages,
-          toolCalls,
-          messageCount: messages.length,
-          startTime: sessionStartTime.current,
-          endTime: Date.now(),
-        });
-      }
+    const session: Session = {
+      sessionId,
+      deploymentId: config.deploymentId,
+      workerId: config.workerId,
+      flowId: config.flowId,
+      startTime: sessionStartTime.current,
+      messages,
+      toolCalls,
+      status: 'completed',
+    };
 
-      const session: Session = {
-        sessionId,
-        deploymentId: config.deploymentId,
-        workerId: config.workerId,
-        flowId: config.flowId,
-        startTime: sessionStartTime.current,
-        messages,
-        toolCalls,
-        status: 'completed',
+    onSessionEnd?.(session);
+    clearSession(config.embedId);
+    setSessionId(null);
+    setMessages([]);
+    setToolCalls([]);
+
+    // Add welcome message back if configured
+    if (config.welcomeMessage) {
+      const welcomeMsg: Message = {
+        id: `welcome-${Date.now()}`,
+        role: 'assistant',
+        content: config.welcomeMessage,
+        timestamp: Date.now(),
+        status: 'sent',
       };
-
-      onSessionEnd?.(session);
-      clearSession(config.embedId);
-      setSessionId(null);
-      setMessages([]);
-      setToolCalls([]);
-    } catch (err) {
-      const error =
-        err instanceof Error ? err : new Error('Failed to end session');
-      setError(error);
-      onError?.(error);
+      setMessages([welcomeMsg]);
     }
   }, [
     sessionId,
     config,
     messages,
     toolCalls,
-    apiClient,
-    mockMode,
     onSessionEnd,
-    onError,
   ]);
 
   const clearMessages = useCallback(() => {
