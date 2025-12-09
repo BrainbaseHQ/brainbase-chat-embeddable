@@ -93,8 +93,8 @@ export const BottomLeft: Story = {
 // Inline mode (embedded in page)
 export const Inline: Story = {
   args: {
-    embedId: "demo",
-    mockMode: true,
+    embedId: "N5B5PJpnCtp0iwxaF2yIj",
+    mockMode: false,
     position: 'inline',
     defaultOpen: true,
     agentName: 'Help Assistant',
