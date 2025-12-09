@@ -74,9 +74,16 @@
   color: var(--bb-text-inverse);
 }
 
-.agentLogoPlaceholder svg {
-  width: 24px;
-  height: 24px;
+.brainbaseLogo {
+  width: 26px;
+  height: 26px;
+}
+
+.agentName {
+  color: var(--bb-text-inverse);
+  font-size: var(--bb-font-size-md);
+  font-weight: var(--bb-font-weight-semibold);
+  opacity: 0.9;
 }
 
 .actions {
@@ -129,5 +136,93 @@
   font-size: var(--bb-font-size-2xl);
   font-weight: var(--bb-font-weight-bold);
   line-height: 1.2;
+}
+
+/* Confirmation dialog */
+.confirmationOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  animation: fadeIn 0.15s ease;
+  backdrop-filter: blur(2px);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.confirmationDialog {
+  background: var(--bb-surface-bg);
+  border-radius: var(--bb-radius-lg);
+  padding: var(--bb-spacing-xl);
+  margin: var(--bb-spacing-lg);
+  box-shadow: var(--bb-shadow-lg);
+  animation: scaleIn 0.2s ease;
+  max-width: 280px;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.confirmationText {
+  margin: 0 0 var(--bb-spacing-lg);
+  font-size: var(--bb-font-size-md);
+  color: var(--bb-text-primary);
+  line-height: var(--bb-line-height);
+  text-align: center;
+}
+
+.confirmationButtons {
+  display: flex;
+  gap: var(--bb-spacing-sm);
+}
+
+.cancelButton,
+.confirmButton {
+  flex: 1;
+  padding: var(--bb-spacing-sm) var(--bb-spacing-md);
+  border-radius: var(--bb-radius-md);
+  font-size: var(--bb-font-size-sm);
+  font-weight: var(--bb-font-weight-medium);
+  cursor: pointer;
+  transition: all var(--bb-transition-fast);
+}
+
+.cancelButton {
+  background: var(--bb-surface-secondary);
+  border: 1px solid var(--bb-border-color);
+  color: var(--bb-text-secondary);
+}
+
+.cancelButton:hover {
+  background: var(--bb-surface-tertiary);
+  color: var(--bb-text-primary);
+}
+
+.confirmButton {
+  background: #ef4444;
+  border: none;
+  color: white;
+}
+
+.confirmButton:hover {
+  background: #dc2626;
 }
 
