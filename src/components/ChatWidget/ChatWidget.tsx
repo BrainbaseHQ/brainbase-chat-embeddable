@@ -7,12 +7,11 @@ import { ChatContainer } from '../ChatContainer';
 import { ChatToggleButton } from '../ChatToggleButton';
 import styles from './ChatWidget.module.css';
 
-const DEFAULT_API_URL = 'https://brainbase-monorepo-api.onrender.com';
 const DEFAULT_ENGINE_URL = 'https://whatsapp-based-server.onrender.com';
 
 export const ChatWidget: React.FC<ChatWidgetProps> = ({
   embedId,
-  apiBaseUrl = DEFAULT_API_URL,
+  apiBaseUrl = DEFAULT_ENGINE_URL,
   mockMode = false,
   mockResponses,
   position = 'bottom-right',
@@ -39,7 +38,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
         mockResponses
       );
     }
-    return createAPIClient(apiBaseUrl, DEFAULT_ENGINE_URL);
+    return createAPIClient(apiBaseUrl);
   }, [mockMode, primaryColor, agentName, welcomeMessage, mockResponses, apiBaseUrl]);
 
   // Fetch deployment config
