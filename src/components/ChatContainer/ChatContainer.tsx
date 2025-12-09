@@ -3,6 +3,7 @@ import type { DeploymentConfig, Message, ToolCall } from '../../types';
 import { ChatHeader } from '../ChatHeader';
 import { MessageList } from '../MessageList';
 import { MessageInput } from '../MessageInput';
+import { PoweredBy } from '../PoweredBy';
 import styles from './ChatContainer.module.css';
 
 export interface ChatContainerProps {
@@ -51,6 +52,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
           placeholder="Ask a question..."
         />
       </div>
+      <PoweredBy />
     </div>
   );
 };
