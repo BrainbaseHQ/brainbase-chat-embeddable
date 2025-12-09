@@ -1,22 +1,34 @@
-# @brainbase/chat-widget
+# @brainbase-labs/chat-widget
 
-A React chat widget for embedding Brainbase AI agents in your applications.
+A React chat widget for embedding [Brainbase Labs](https://brainbaselabs.com) AI agents in your applications.
+
+[![npm version](https://img.shields.io/npm/v/@brainbase-labs/chat-widget.svg)](https://www.npmjs.com/package/@brainbase-labs/chat-widget)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
+## Features
+
+- 🚀 **Drop-in React component** - Add AI chat to your app in minutes
+- 🎨 **Fully customizable** - Theme with CSS variables or override styles
+- 📱 **Responsive** - Works on desktop and mobile
+- 🔄 **Session persistence** - Conversations survive page refreshes
+- 🛠️ **Tool call support** - Display function calls and results
+- 🧪 **Mock mode** - Develop UI without a backend connection
 
 ## Installation
 
 ```bash
-npm install @brainbase/chat-widget
+npm install @brainbase-labs/chat-widget
 # or
-yarn add @brainbase/chat-widget
+yarn add @brainbase-labs/chat-widget
 # or
-pnpm add @brainbase/chat-widget
+pnpm add @brainbase-labs/chat-widget
 ```
 
 ## Quick Start
 
 ```tsx
-import { ChatWidget } from '@brainbase/chat-widget';
-import '@brainbase/chat-widget/styles.css';
+import { ChatWidget } from '@brainbase-labs/chat-widget';
+import '@brainbase-labs/chat-widget/styles.css';
 
 function App() {
   return (
@@ -33,8 +45,8 @@ function App() {
 Test the UI without a backend connection:
 
 ```tsx
-import { ChatWidget } from '@brainbase/chat-widget';
-import '@brainbase/chat-widget/styles.css';
+import { ChatWidget } from '@brainbase-labs/chat-widget';
+import '@brainbase-labs/chat-widget/styles.css';
 
 function App() {
   return (
@@ -43,7 +55,6 @@ function App() {
       mockMode={true}
       defaultOpen={true}
       agentName="Dev Assistant"
-      welcomeMessage="Mock mode enabled! Test the UI without a backend."
     />
   );
 }
@@ -80,15 +91,14 @@ function App() {
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `embedId` | `string` | Required | The embed ID from your Brainbase deployment |
-| `apiBaseUrl` | `string` | Production URL | API base URL for the Brainbase API |
+| `embedId` | `string` | Required | The embed ID from your Brainbase Labs deployment |
+| `apiBaseUrl` | `string` | Production URL | API base URL for the Brainbase Labs API |
 | `mockMode` | `boolean` | `false` | Enable mock mode for UI development |
 | `mockResponses` | `MockResponse[]` | Default responses | Custom mock responses |
 | `position` | `'bottom-right' \| 'bottom-left' \| 'inline'` | `'bottom-right'` | Widget position |
 | `defaultOpen` | `boolean` | `false` | Whether widget starts open |
-| `primaryColor` | `string` | `'#1a1a2e'` | Primary theme color |
+| `primaryColor` | `string` | `'#1a1a2e'` | Primary theme color (hex) |
 | `agentName` | `string` | From deployment | Agent display name |
-| `welcomeMessage` | `string` | From deployment | Initial welcome message |
 | `className` | `string` | - | Custom CSS class |
 | `onSessionStart` | `(sessionId: string) => void` | - | Session start callback |
 | `onSessionEnd` | `(session: Session) => void` | - | Session end callback |
@@ -101,10 +111,29 @@ The widget uses CSS custom properties for theming. Override them in your CSS:
 
 ```css
 :root {
-  --bb-primary-color: #your-color;
-  --bb-accent-color: #your-accent;
-  --bb-surface-bg: #your-background;
-  /* ... see variables.css for all options */
+  /* Primary brand color */
+  --bb-primary-color: #1a1a2e;
+  
+  /* Accent color for highlights */
+  --bb-accent-color: #6366f1;
+  
+  /* Background colors */
+  --bb-surface-bg: #ffffff;
+  --bb-surface-secondary: #f8f9fb;
+  
+  /* Text colors */
+  --bb-text-primary: #1a1a2e;
+  --bb-text-secondary: #6b7280;
+  
+  /* Message bubbles */
+  --bb-user-message-bg: var(--bb-primary-color);
+  --bb-user-message-text: #ffffff;
+  --bb-assistant-message-bg: var(--bb-surface-secondary);
+  --bb-assistant-message-text: var(--bb-text-primary);
+  
+  /* Widget dimensions */
+  --bb-widget-width: 400px;
+  --bb-widget-height: 600px;
 }
 ```
 
@@ -115,7 +144,7 @@ The widget uses CSS custom properties for theming. Override them in your CSS:
 For custom UI implementations:
 
 ```tsx
-import { useChat, createMockAPIClient } from '@brainbase/chat-widget';
+import { useChat, createMockAPIClient } from '@brainbase-labs/chat-widget';
 
 function CustomChat() {
   const mockClient = createMockAPIClient();
@@ -136,12 +165,43 @@ function CustomChat() {
       {chat.messages.map(msg => (
         <div key={msg.id}>{msg.content}</div>
       ))}
-      <button onClick={() => chat.sendMessage('Hello!')}>
-        Send
-      </button>
+      <input
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            chat.sendMessage(e.currentTarget.value);
+            e.currentTarget.value = '';
+          }
+        }}
+      />
     </div>
   );
 }
+```
+
+### Inline Mode
+
+Embed the chat directly in your page layout instead of as a floating widget:
+
+```tsx
+<ChatWidget
+  embedId="your-embed-id"
+  position="inline"
+  defaultOpen={true}
+/>
+```
+
+## TypeScript
+
+Full TypeScript support with exported types:
+
+```tsx
+import type {
+  ChatWidgetProps,
+  Message,
+  Session,
+  ToolCall,
+  DeploymentConfig,
+} from '@brainbase-labs/chat-widget';
 ```
 
 ## Development
@@ -158,8 +218,15 @@ npm run build
 
 # Type check
 npm run typecheck
+
+# Lint
+npm run lint
 ```
+
+## Contributing
+
+Contributions are welcome! Please read our contributing guidelines before submitting a PR.
 
 ## License
 
-MIT
+MIT © [Brainbase Labs](https://brainbaselabs.com)
