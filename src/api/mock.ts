@@ -3,8 +3,6 @@ import type { DeploymentConfig, MockResponse, SSEEvent } from '../types';
 export interface MockAPIClient {
   getDeploymentConfig(embedId: string): Promise<DeploymentConfig>;
   sendMessage(message: string): AsyncGenerator<SSEEvent>;
-  startSession(): Promise<void>;
-  endSession(): Promise<void>;
 }
 
 const DEFAULT_MOCK_CONFIG: DeploymentConfig = {
@@ -15,7 +13,7 @@ const DEFAULT_MOCK_CONFIG: DeploymentConfig = {
   welcomeMessage: 'Hello! How can I help you today?',
   agentName: 'AI Assistant',
   agentLogoUrl: undefined,
-  primaryColor: '#6366f1',
+  primaryColor: '#1a1a2e',
   styling: {},
 };
 
@@ -81,6 +79,9 @@ export function createMockAPIClient(
 ): MockAPIClient {
   const config = { ...DEFAULT_MOCK_CONFIG, ...customConfig };
   const responses = customResponses ?? DEFAULT_MOCK_RESPONSES;
+  
+  // Generate a mock session ID
+  const mockSessionId = `mock-session-${Date.now()}`;
 
   return {
     async getDeploymentConfig(_embedId: string): Promise<DeploymentConfig> {
@@ -90,6 +91,13 @@ export function createMockAPIClient(
     },
 
     async *sendMessage(message: string): AsyncGenerator<SSEEvent> {
+      // First, send session info (matches server behavior)
+      yield {
+        type: 'session',
+        data: { session_id: mockSessionId, is_new: true },
+        timestamp: Date.now(),
+      };
+
       // Find matching response
       const matchedResponse =
         responses.find((r) =>
@@ -101,25 +109,23 @@ export function createMockAPIClient(
       // Simulate typing delay
       await delay(matchedResponse.delay ?? 500);
 
-      // Emit tool calls if any
+      // Emit tool calls if any (using server's event format)
       if (matchedResponse.toolCalls) {
         for (const tc of matchedResponse.toolCalls) {
           yield {
-            type: 'function_call',
+            type: 'tool_call',
             data: {
-              name: tc.name,
-              arguments: tc.arguments,
-              status: 'pending',
+              function: tc.name,
+              args: tc.arguments,
             },
             timestamp: Date.now(),
           };
           await delay(300);
           yield {
-            type: 'function_call',
+            type: 'tool_call',
             data: {
-              name: tc.name,
+              function: tc.name,
               result: tc.result,
-              status: 'completed',
             },
             timestamp: Date.now(),
           };
@@ -127,38 +133,26 @@ export function createMockAPIClient(
         }
       }
 
-      // Stream the response word by word
+      // Stream the response word by word (using server's 'message' event type)
       const words = matchedResponse.response.split(' ');
       let accumulated = '';
 
       for (const word of words) {
         accumulated += (accumulated ? ' ' : '') + word;
         yield {
-          type: 'say',
-          data: { text: accumulated, partial: true },
+          type: 'message',
+          data: { content: accumulated, role: 'assistant' },
           timestamp: Date.now(),
         };
         await delay(30 + Math.random() * 40);
       }
 
-      // Final complete message
-      yield {
-        type: 'say',
-        data: { text: matchedResponse.response, partial: false },
-        timestamp: Date.now(),
+      // Final done event
+      yield { 
+        type: 'done', 
+        data: { session_id: mockSessionId }, 
+        timestamp: Date.now() 
       };
-
-      yield { type: 'completed', data: {}, timestamp: Date.now() };
-    },
-
-    async startSession(): Promise<void> {
-      await delay(100);
-      console.log('[Mock] Session started');
-    },
-
-    async endSession(): Promise<void> {
-      await delay(100);
-      console.log('[Mock] Session ended');
     },
   };
 }
