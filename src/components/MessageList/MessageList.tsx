@@ -66,7 +66,7 @@ export const MessageList: React.FC<MessageListProps> = ({
       ))}
 
       {isLoading && messages[messages.length - 1]?.role === 'user' && (
-        <TypingIndicator agentName={agentName} />
+        <TypingIndicator agentName={agentName} agentLogoUrl={agentLogoUrl} />
       )}
 
       <div ref={bottomRef} />
