@@ -1,0 +1,133 @@
+.header {
+  position: relative;
+  padding: var(--bb-spacing-xl) var(--bb-spacing-xl) var(--bb-spacing-2xl);
+  min-height: 140px;
+  overflow: hidden;
+}
+
+.headerBackground {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    var(--bb-primary-color) 0%,
+    #2d2d5a 50%,
+    #1a1a2e 100%
+  );
+}
+
+.headerBackground::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 30% 20%,
+    rgba(255, 255, 255, 0.08) 0%,
+    transparent 50%
+  );
+}
+
+.headerBackground::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.1), transparent);
+}
+
+.headerContent {
+  position: relative;
+  z-index: 1;
+}
+
+.topRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--bb-spacing-xl);
+}
+
+.agentInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-spacing-md);
+}
+
+.agentLogo {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--bb-radius-md);
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.agentLogoPlaceholder {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--bb-radius-md);
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bb-text-inverse);
+}
+
+.agentLogoPlaceholder svg {
+  width: 24px;
+  height: 24px;
+}
+
+.actions {
+  display: flex;
+  gap: var(--bb-spacing-sm);
+}
+
+.actionButton {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--bb-radius-full);
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bb-text-inverse);
+  transition: background var(--bb-transition-fast);
+}
+
+.actionButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.actionButton:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
+
+.actionButton svg {
+  width: 18px;
+  height: 18px;
+}
+
+.welcomeText {
+  color: var(--bb-text-inverse);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--bb-font-size-2xl);
+  font-weight: var(--bb-font-weight-normal);
+  opacity: 0.7;
+  line-height: 1.2;
+}
+
+.subtitle {
+  margin: var(--bb-spacing-xs) 0 0;
+  font-size: var(--bb-font-size-2xl);
+  font-weight: var(--bb-font-weight-bold);
+  line-height: 1.2;
+}
+

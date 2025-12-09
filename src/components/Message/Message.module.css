@@ -1,0 +1,120 @@
+.messageWrapper {
+  display: flex;
+  gap: var(--bb-spacing-md);
+  max-width: 85%;
+  animation: messageSlideIn 0.3s ease;
+}
+
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.messageWrapper.user {
+  flex-direction: row-reverse;
+  margin-left: auto;
+}
+
+.messageWrapper.assistant {
+  margin-right: auto;
+}
+
+.avatar {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--bb-radius-full);
+  overflow: hidden;
+  margin-top: 2px;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatarPlaceholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--bb-primary-color), #4f46e5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bb-text-inverse);
+}
+
+.avatarPlaceholder svg {
+  width: 14px;
+  height: 14px;
+}
+
+.messageBubble {
+  padding: var(--bb-spacing-md) var(--bb-spacing-lg);
+  border-radius: var(--bb-radius-lg);
+  position: relative;
+}
+
+.user .messageBubble {
+  background: var(--bb-user-message-bg);
+  color: var(--bb-user-message-text);
+  border-bottom-right-radius: var(--bb-spacing-xs);
+}
+
+.assistant .messageBubble {
+  background: var(--bb-assistant-message-bg);
+  color: var(--bb-assistant-message-text);
+  border-bottom-left-radius: var(--bb-spacing-xs);
+}
+
+.messageBubble.error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.content {
+  font-size: var(--bb-font-size-md);
+  line-height: var(--bb-line-height);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: currentColor;
+  margin-left: 2px;
+  animation: blink 1s infinite;
+  vertical-align: text-bottom;
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+.errorIndicator {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-spacing-xs);
+  margin-top: var(--bb-spacing-sm);
+  color: #ef4444;
+  font-size: var(--bb-font-size-sm);
+}
+
+.errorIndicator svg {
+  width: 14px;
+  height: 14px;
+}
+

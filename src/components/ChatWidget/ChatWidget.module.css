@@ -1,0 +1,40 @@
+.widget {
+  font-family: var(--bb-font-family);
+  font-size: var(--bb-font-size-md);
+  line-height: var(--bb-line-height);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Floating positions */
+.bottom-right {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+}
+
+.bottom-left {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 9999;
+}
+
+/* Inline mode - no fixed positioning */
+.inline {
+  position: relative;
+  width: 100%;
+  max-width: var(--bb-widget-width);
+}
+
+/* Responsive adjustments for floating widgets */
+@media (max-width: 480px) {
+  .bottom-right,
+  .bottom-left {
+    bottom: 0;
+    right: 0;
+    left: 0;
+  }
+}
+
