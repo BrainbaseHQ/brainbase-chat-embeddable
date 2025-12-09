@@ -32,13 +32,14 @@ export interface ToolCall {
   timestamp: number;
 }
 
-// SSE Event types (from engine)
+// SSE Event types (from messaging server)
 export type SSEEventType =
-  | 'say' // Agent text response
-  | 'talk' // Agent speaking (for voice, maps to text here)
-  | 'function_call' // Tool/function execution
-  | 'waiting_for_response' // Agent waiting
-  | 'completed' // Session complete
+  | 'session' // Session info (session_id, is_new)
+  | 'message' // Agent text response (content, role)
+  | 'tool_call' // Tool/function execution
+  | 'waiting' // Agent is processing
+  | 'done' // Stream complete
+  | 'completed' // Conversation ended
   | 'error'; // Error occurred
 
 export interface SSEEvent {
@@ -119,35 +120,13 @@ export interface MockResponse {
 // API Client interface
 export interface BrainbaseAPIClient {
   getDeploymentConfig(embedId: string): Promise<DeploymentConfig>;
-  startSession(params: StartSessionParams): Promise<void>;
   sendMessage(params: SendMessageParams): Promise<ReadableStream<Uint8Array>>;
-  endSession(params: EndSessionParams): Promise<void>;
-}
-
-export interface StartSessionParams {
-  deploymentId: string;
-  workerId: string;
-  flowId: string;
-  sessionId: string;
-  userAgent: string;
-  originUrl: string;
 }
 
 export interface SendMessageParams {
-  sessionId: string;
-  deploymentId: string;
-  workerId: string;
-  flowId: string;
+  embedId: string;
   message: string;
-}
-
-export interface EndSessionParams {
-  workerId: string;
-  sessionId: string;
-  messages: Message[];
-  toolCalls: ToolCall[];
-  messageCount: number;
-  startTime: number;
-  endTime: number;
+  sessionId?: string;
+  metadata?: Record<string, unknown>;
 }
 
