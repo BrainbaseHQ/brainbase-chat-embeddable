@@ -1,6 +1,11 @@
 import React from 'react';
 import styles from './PoweredBy.module.css';
 
+export interface PoweredByProps {
+  /** Whether to show the "Powered by Brainbase Labs" branding. Defaults to true. */
+  showBranding?: boolean;
+}
+
 // Brainbase Labs logo - inline SVG for reliability (no external dependencies)
 const BrainbaseLabsLogo: React.FC<{ className?: string }> = ({ className }) => (
   <svg
@@ -39,7 +44,12 @@ const BrainbaseLabsLogo: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-export const PoweredBy: React.FC = () => {
+export const PoweredBy: React.FC<PoweredByProps> = ({ showBranding = true }) => {
+  // Don't render anything if branding is disabled
+  if (!showBranding) {
+    return null;
+  }
+
   return (
     <a
       href="https://brainbaselabs.com/"
