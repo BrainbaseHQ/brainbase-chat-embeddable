@@ -14,28 +14,9 @@ import { resolve } from 'path';
 export default defineConfig({
   plugins: [
     react(),
-    // Inject CSS directly into the JS bundle for single-file distribution
+    // Inject CSS into the JS bundle - styles go into <head> automatically
     cssInjectedByJsPlugin({
       styleId: 'brainbase-chat-styles',
-      // Inject into shadow root if available
-      injectCodeFunction: function injectStyles(cssCode: string) {
-        try {
-          // Create a style element
-          const style = document.createElement('style');
-          style.textContent = cssCode;
-          
-          // Try to inject into shadow root of our custom element
-          const widget = document.querySelector('brainbase-chat');
-          if (widget && widget.shadowRoot) {
-            widget.shadowRoot.appendChild(style);
-          } else {
-            // Fallback: inject into document head
-            document.head.appendChild(style);
-          }
-        } catch (e) {
-          console.error('[Brainbase Chat] Failed to inject styles:', e);
-        }
-      },
     }),
   ],
   define: {
@@ -57,8 +38,6 @@ export default defineConfig({
       output: {
         // Ensure we use a single bundle with no code-splitting
         inlineDynamicImports: true,
-        // Give React globals for any edge cases
-        globals: {},
       },
     },
     // Minify for production
@@ -69,8 +48,8 @@ export default defineConfig({
         drop_debugger: true,
       },
     },
-    // Smaller chunks threshold for standalone embed
-    chunkSizeWarningLimit: 500,
+    // Reasonable chunk size warning for standalone embed
+    chunkSizeWarningLimit: 600,
   },
   resolve: {
     alias: {
@@ -78,4 +57,3 @@ export default defineConfig({
     },
   },
 });
-
