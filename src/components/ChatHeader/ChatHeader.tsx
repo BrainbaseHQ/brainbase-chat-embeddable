@@ -24,8 +24,12 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   showNewChatButton = false,
   compact = false,
 }) => {
-  const displayTitle = welcomeTitle || `Hello there.`;
-  const displaySubtitle = welcomeSubtitle || 'How can we help?';
+  // Use provided values or defaults
+  const displayTitle = welcomeTitle || 'Hello there.';
+  // Only show default subtitle if no custom welcomeTitle was provided
+  const displaySubtitle = welcomeSubtitle !== undefined 
+    ? welcomeSubtitle 
+    : (welcomeTitle ? undefined : 'How can we help?');
 
   return (
     <div className={`${styles.header} ${compact ? styles.compact : ''}`}>
@@ -92,7 +96,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
         {!compact && (
           <div className={styles.welcomeText}>
             <h1 className={styles.title}>{displayTitle}</h1>
-            <p className={styles.subtitle}>{displaySubtitle}</p>
+            {displaySubtitle && <p className={styles.subtitle}>{displaySubtitle}</p>}
           </div>
         )}
       </div>
