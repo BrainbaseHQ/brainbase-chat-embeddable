@@ -1,4 +1,5 @@
 .container {
+  position: relative;
   display: flex;
   flex-direction: column;
   width: var(--bb-widget-width);
@@ -28,6 +29,100 @@
   flex-direction: column;
   min-height: 0;
   background: var(--bb-surface-bg);
+}
+
+/* Confirmation dialog - overlays the entire chat container */
+.confirmationOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: overlayFadeIn 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.confirmationDialog {
+  background: var(--bb-surface-bg);
+  border-radius: var(--bb-radius-xl);
+  padding: var(--bb-spacing-2xl);
+  margin: var(--bb-spacing-xl);
+  box-shadow: var(--bb-shadow-xl);
+  animation: dialogSlideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  max-width: 300px;
+  width: calc(100% - 48px);
+}
+
+@keyframes dialogSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.confirmationText {
+  margin: 0 0 var(--bb-spacing-xl);
+  font-size: var(--bb-font-size-md);
+  color: var(--bb-text-primary);
+  line-height: var(--bb-line-height);
+  text-align: center;
+}
+
+.confirmationButtons {
+  display: flex;
+  gap: var(--bb-spacing-md);
+}
+
+.cancelButton,
+.confirmButton {
+  flex: 1;
+  padding: var(--bb-spacing-md) var(--bb-spacing-lg);
+  border-radius: var(--bb-radius-md);
+  font-size: var(--bb-font-size-sm);
+  font-weight: var(--bb-font-weight-medium);
+  cursor: pointer;
+  transition: all var(--bb-transition-fast);
+}
+
+.cancelButton {
+  background: var(--bb-surface-secondary);
+  border: 1px solid var(--bb-border-color);
+  color: var(--bb-text-secondary);
+}
+
+.cancelButton:hover {
+  background: var(--bb-surface-tertiary);
+  color: var(--bb-text-primary);
+}
+
+.confirmButton {
+  background: #ef4444;
+  border: none;
+  color: white;
+}
+
+.confirmButton:hover {
+  background: #dc2626;
+}
+
+.confirmButton:active,
+.cancelButton:active {
+  transform: scale(0.98);
 }
 
 /* Responsive adjustments */
