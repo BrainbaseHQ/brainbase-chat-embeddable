@@ -63,6 +63,9 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Verify dist contents
+        run: ls -la dist/
+
       - name: Publish to npm
         run: npm publish --access public --provenance
         env:
