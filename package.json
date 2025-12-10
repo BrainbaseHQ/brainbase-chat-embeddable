@@ -37,8 +37,8 @@
       "require": "./dist/index.cjs"
     },
     "./embed": {
-      "import": "./dist/embed.js",
-      "require": "./dist/embed.js"
+      "import": "./dist/embed/index.js",
+      "require": "./dist/embed/index.js"
     },
     "./styles.css": "./dist/styles.css"
   },
@@ -54,7 +54,7 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && npm run build:embed && node scripts/copy-styles.mjs",
+    "build": "tsc && vite build && node scripts/copy-styles.mjs && npm run build:embed",
     "build:lib": "tsc && vite build",
     "build:embed": "vite build --config vite.embed.config.ts",
     "preview": "vite preview",

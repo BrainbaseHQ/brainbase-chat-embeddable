@@ -24,13 +24,13 @@ export default defineConfig({
     'process.env.NODE_ENV': JSON.stringify('production'),
   },
   build: {
-    outDir: 'dist',
-    emptyDir: false, // Don't clear the dist folder (library build runs first)
+    outDir: 'dist/embed',
+    emptyDir: false, // Keep library output intact
     lib: {
       entry: resolve(__dirname, 'src/embed/index.ts'),
       name: 'BrainbaseChat',
       formats: ['iife'],
-      fileName: () => 'embed.js',
+      fileName: () => 'index.js',
     },
     rollupOptions: {
       // Bundle everything - no external dependencies for standalone embed

@@ -5,12 +5,7 @@ const distCssPath = path.resolve('dist/styles.css');
 const rootCssPath = path.resolve('styles.css');
 
 async function copyStyles() {
-  try {
-    await fs.access(distCssPath);
-  } catch (err) {
-    console.warn(`[copy-styles] ${distCssPath} not found, skipping copy.`);
-    return;
-  }
+  await fs.access(distCssPath);
 
   await fs.copyFile(distCssPath, rootCssPath);
   console.log(`[copy-styles] Copied ${distCssPath} -> ${rootCssPath}`);
