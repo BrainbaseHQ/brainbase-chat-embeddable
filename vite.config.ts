@@ -3,13 +3,17 @@ import react from '@vitejs/plugin-react';
 import dts from 'vite-plugin-dts';
 import { resolve } from 'path';
 
+// Check if we're running in Storybook
+const isStorybook = process.env.STORYBOOK === 'true';
+
 export default defineConfig({
   plugins: [
     react(),
-    dts({
+    // Only include DTS plugin for library builds, not Storybook
+    ...(!isStorybook ? [dts({
       insertTypesEntry: true,
       rollupTypes: true,
-    }),
+    })] : []),
   ],
   build: {
     lib: {
@@ -40,4 +44,3 @@ export default defineConfig({
     },
   },
 });
-
