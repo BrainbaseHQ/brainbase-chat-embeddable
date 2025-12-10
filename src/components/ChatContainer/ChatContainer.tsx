@@ -46,8 +46,8 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
       <ChatHeader
         agentName={config.agentName}
         agentLogoUrl={config.agentLogoUrl}
-        welcomeTitle="Hello there."
-        welcomeSubtitle="How can we help?"
+        welcomeTitle={config.welcomeMessage || "Hello there."}
+        welcomeSubtitle={config.welcomeMessage ? undefined : "How can we help?"}
         onClose={onClose}
         onNewChatRequest={handleNewChatRequest}
         showNewChatButton={hasMessages}
@@ -67,7 +67,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
           placeholder="Ask a question..."
         />
       </div>
-      <PoweredBy />
+      <PoweredBy showBranding={(config.styling?.showBranding as boolean) ?? true} />
 
       {/* Confirmation dialog - positioned at container level to overlay entire widget */}
       {showConfirmation && (
