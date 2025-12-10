@@ -1,13 +1,16 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import type { ChatWidgetProps, DeploymentConfig } from '../../types';
 import { useChat } from '../../hooks/useChat';
 import { createAPIClient } from '../../api/client';
 import { createMockAPIClient } from '../../api/mock';
 import { ChatContainer } from '../ChatContainer';
 import { ChatToggleButton } from '../ChatToggleButton';
+import { ErrorState } from '../ErrorState';
 import styles from './ChatWidget.module.css';
 
 const DEFAULT_ENGINE_URL = 'https://whatsapp-based-server.onrender.com';
+
+type ErrorType = 'not_found' | 'network' | 'unknown' | null;
 
 export const ChatWidget: React.FC<ChatWidgetProps> = ({
   embedId,
@@ -28,7 +31,8 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [config, setConfig] = useState<DeploymentConfig | null>(null);
   const [isLoadingConfig, setIsLoadingConfig] = useState(true);
-  const [configError, setConfigError] = useState<Error | null>(null);
+  const [errorType, setErrorType] = useState<ErrorType>(null);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
   // Create API client based on mode
   const apiClient = useMemo(() => {
@@ -42,50 +46,55 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   }, [mockMode, primaryColor, agentName, welcomeMessage, mockResponses, apiBaseUrl]);
 
   // Fetch deployment config
-  useEffect(() => {
-    let mounted = true;
+  const fetchConfig = useCallback(async () => {
+    setIsLoadingConfig(true);
+    setErrorType(null);
+    setErrorMessage(undefined);
 
-    async function fetchConfig() {
-      try {
-        const deploymentConfig = await apiClient.getDeploymentConfig(embedId);
-        if (mounted) {
-          setConfig({
-            ...deploymentConfig,
-            // Allow prop overrides
-            primaryColor: primaryColor ?? deploymentConfig.primaryColor,
-            agentName: agentName ?? deploymentConfig.agentName,
-            welcomeMessage: welcomeMessage ?? deploymentConfig.welcomeMessage,
-          });
-          setConfigError(null);
-        }
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error('Failed to load config');
-        if (mounted) {
-          setConfigError(error);
-          // In mock mode, use default config on error
-          if (mockMode) {
-            setConfig({
-              embedId,
-              deploymentId: 'mock-deployment',
-              workerId: 'mock-worker',
-              flowId: 'mock-flow',
-              primaryColor: primaryColor ?? '#1a1a2e',
-              agentName: agentName ?? 'AI Assistant',
-              // Note: welcomeMessage is handled by the engine
-            });
-          }
-        }
-        onError?.(error);
-      } finally {
-        if (mounted) setIsLoadingConfig(false);
+    try {
+      const deploymentConfig = await apiClient.getDeploymentConfig(embedId);
+      setConfig({
+        ...deploymentConfig,
+        // Allow prop overrides
+        primaryColor: primaryColor ?? deploymentConfig.primaryColor,
+        agentName: agentName ?? deploymentConfig.agentName,
+        welcomeMessage: welcomeMessage ?? deploymentConfig.welcomeMessage,
+      });
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to load config');
+      
+      // Determine error type
+      if (error.message.includes('404')) {
+        setErrorType('not_found');
+        setErrorMessage('The chat widget with this embed ID was not found.');
+      } else if (error.message.includes('Failed to fetch') || error.message.includes('network')) {
+        setErrorType('network');
+      } else {
+        setErrorType('unknown');
       }
-    }
 
-    fetchConfig();
-    return () => {
-      mounted = false;
-    };
+      // In mock mode, use default config on error
+      if (mockMode) {
+        setConfig({
+          embedId,
+          deploymentId: 'mock-deployment',
+          workerId: 'mock-worker',
+          flowId: 'mock-flow',
+          primaryColor: primaryColor ?? '#1a1a2e',
+          agentName: agentName ?? 'AI Assistant',
+        });
+        setErrorType(null);
+      }
+
+      onError?.(error);
+    } finally {
+      setIsLoadingConfig(false);
+    }
   }, [embedId, mockMode, apiClient, primaryColor, agentName, welcomeMessage, onError]);
+
+  useEffect(() => {
+    fetchConfig();
+  }, [fetchConfig]);
 
   // Create a stable config for useChat
   const chatConfig = useMemo((): DeploymentConfig => {
@@ -126,17 +135,54 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
     chat.startNewSession();
   };
 
-  // Don't render anything while loading (unless in mock mode with error)
+  // Handle close
+  const handleClose = () => {
+    setIsOpen(false);
+  };
+
+  // Handle retry
+  const handleRetry = () => {
+    fetchConfig();
+  };
+
+  const isInline = position === 'inline';
+
+  // Don't render anything while loading
   if (isLoadingConfig) {
     return null;
   }
 
-  // Show error state only if not in mock mode
-  if (configError && !mockMode) {
-    return null;
-  }
+  // Show error state when there's an error
+  if (errorType && !mockMode) {
+    // For non-inline position, only show error when widget is open
+    if (!isInline && !isOpen) {
+      return (
+        <div
+          className={`${styles.widget} ${styles[position]} ${className ?? ''}`}
+          style={themeStyle}
+        >
+          <ChatToggleButton
+            onClick={() => setIsOpen(true)}
+            agentName={agentName}
+          />
+        </div>
+      );
+    }
 
-  const isInline = position === 'inline';
+    return (
+      <div
+        className={`${styles.widget} ${styles[position]} ${className ?? ''}`}
+        style={themeStyle}
+      >
+        <ErrorState
+          errorType={errorType}
+          message={errorMessage}
+          onRetry={handleRetry}
+          onClose={isInline ? undefined : handleClose}
+        />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -150,7 +196,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
           toolCalls={chat.toolCalls}
           isLoading={chat.isLoading}
           onSendMessage={chat.sendMessage}
-          onClose={isInline ? undefined : () => setIsOpen(false)}
+          onClose={isInline ? undefined : handleClose}
           onNewChat={handleNewChat}
         />
       ) : (
@@ -163,4 +209,3 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
     </div>
   );
 };
-

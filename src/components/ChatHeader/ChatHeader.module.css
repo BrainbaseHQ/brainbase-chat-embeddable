@@ -1,8 +1,20 @@
 .header {
   position: relative;
+  overflow: hidden;
+  /* Smooth transition with better easing */
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Expanded state (default) */
+.header:not(.compact) {
   padding: var(--bb-spacing-xl) var(--bb-spacing-xl) var(--bb-spacing-2xl);
   min-height: 140px;
-  overflow: hidden;
+}
+
+/* Compact mode - smaller header when chat is active */
+.header.compact {
+  padding: var(--bb-spacing-lg) var(--bb-spacing-xl);
+  min-height: 56px;
 }
 
 .headerBackground {
@@ -11,9 +23,10 @@
   background: linear-gradient(
     135deg,
     var(--bb-primary-color) 0%,
-    #2d2d5a 50%,
-    #1a1a2e 100%
+    color-mix(in srgb, var(--bb-primary-color) 70%, #2d2d5a) 50%,
+    color-mix(in srgb, var(--bb-primary-color) 50%, #1a1a2e) 100%
   );
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .headerBackground::before {
@@ -35,6 +48,12 @@
   right: 0;
   height: 60px;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.1), transparent);
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.compact .headerBackground::after {
+  opacity: 0;
 }
 
 .headerContent {
@@ -44,9 +63,17 @@
 
 .topRow {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
+  transition: margin 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header:not(.compact) .topRow {
   margin-bottom: var(--bb-spacing-xl);
+}
+
+.compact .topRow {
+  margin-bottom: 0;
 }
 
 .agentInfo {
@@ -56,34 +83,62 @@
 }
 
 .agentLogo {
-  width: 40px;
-  height: 40px;
   border-radius: var(--bb-radius-md);
   object-fit: cover;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header:not(.compact) .agentLogo {
+  width: 36px;
+  height: 36px;
+}
+
+.compact .agentLogo {
+  width: 32px;
+  height: 32px;
 }
 
 .agentLogoPlaceholder {
-  width: 40px;
-  height: 40px;
   border-radius: var(--bb-radius-md);
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--bb-primary-color);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--bb-text-inverse);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header:not(.compact) .agentLogoPlaceholder {
+  width: 36px;
+  height: 36px;
+}
+
+.compact .agentLogoPlaceholder {
+  width: 32px;
+  height: 32px;
 }
 
 .brainbaseLogo {
-  width: 26px;
-  height: 26px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header:not(.compact) .brainbaseLogo {
+  width: 24px;
+  height: 24px;
+}
+
+.compact .brainbaseLogo {
+  width: 22px;
+  height: 22px;
 }
 
 .agentName {
   color: var(--bb-text-inverse);
   font-size: var(--bb-font-size-md);
   font-weight: var(--bb-font-weight-semibold);
-  opacity: 0.9;
+  opacity: 0.95;
 }
 
 .actions {
@@ -102,11 +157,16 @@
   align-items: center;
   justify-content: center;
   color: var(--bb-text-inverse);
-  transition: background var(--bb-transition-fast);
+  transition: background var(--bb-transition-fast), transform var(--bb-transition-fast);
 }
 
 .actionButton:hover {
   background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.actionButton:active {
+  transform: scale(0.95);
 }
 
 .actionButton:focus-visible {
@@ -119,8 +179,24 @@
   height: 18px;
 }
 
+/* Welcome text with smooth collapse */
 .welcomeText {
   color: var(--bb-text-inverse);
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header:not(.compact) .welcomeText {
+  opacity: 1;
+  max-height: 100px;
+  transform: translateY(0);
+}
+
+.compact .welcomeText {
+  opacity: 0;
+  max-height: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
 }
 
 .title {
@@ -136,93 +212,5 @@
   font-size: var(--bb-font-size-2xl);
   font-weight: var(--bb-font-weight-bold);
   line-height: 1.2;
-}
-
-/* Confirmation dialog */
-.confirmationOverlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-  animation: fadeIn 0.15s ease;
-  backdrop-filter: blur(2px);
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.confirmationDialog {
-  background: var(--bb-surface-bg);
-  border-radius: var(--bb-radius-lg);
-  padding: var(--bb-spacing-xl);
-  margin: var(--bb-spacing-lg);
-  box-shadow: var(--bb-shadow-lg);
-  animation: scaleIn 0.2s ease;
-  max-width: 280px;
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.confirmationText {
-  margin: 0 0 var(--bb-spacing-lg);
-  font-size: var(--bb-font-size-md);
-  color: var(--bb-text-primary);
-  line-height: var(--bb-line-height);
-  text-align: center;
-}
-
-.confirmationButtons {
-  display: flex;
-  gap: var(--bb-spacing-sm);
-}
-
-.cancelButton,
-.confirmButton {
-  flex: 1;
-  padding: var(--bb-spacing-sm) var(--bb-spacing-md);
-  border-radius: var(--bb-radius-md);
-  font-size: var(--bb-font-size-sm);
-  font-weight: var(--bb-font-weight-medium);
-  cursor: pointer;
-  transition: all var(--bb-transition-fast);
-}
-
-.cancelButton {
-  background: var(--bb-surface-secondary);
-  border: 1px solid var(--bb-border-color);
-  color: var(--bb-text-secondary);
-}
-
-.cancelButton:hover {
-  background: var(--bb-surface-tertiary);
-  color: var(--bb-text-primary);
-}
-
-.confirmButton {
-  background: #ef4444;
-  border: none;
-  color: white;
-}
-
-.confirmButton:hover {
-  background: #dc2626;
 }
 

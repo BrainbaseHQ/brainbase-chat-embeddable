@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { DeploymentConfig, Message, ToolCall } from '../../types';
 import { ChatHeader } from '../ChatHeader';
 import { MessageList } from '../MessageList';
@@ -25,7 +25,21 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
   onClose,
   onNewChat,
 }) => {
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const hasMessages = messages.length > 0;
+
+  const handleNewChatRequest = () => {
+    setShowConfirmation(true);
+  };
+
+  const handleConfirmNewChat = () => {
+    setShowConfirmation(false);
+    onNewChat?.();
+  };
+
+  const handleCancelNewChat = () => {
+    setShowConfirmation(false);
+  };
 
   return (
     <div className={styles.container} role="dialog" aria-label="Chat window">
@@ -35,8 +49,9 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
         welcomeTitle="Hello there."
         welcomeSubtitle="How can we help?"
         onClose={onClose}
-        onNewChat={onNewChat}
+        onNewChatRequest={handleNewChatRequest}
         showNewChatButton={hasMessages}
+        compact={hasMessages}
       />
       <div className={styles.body}>
         <MessageList
@@ -53,7 +68,33 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
         />
       </div>
       <PoweredBy />
+
+      {/* Confirmation dialog - positioned at container level to overlay entire widget */}
+      {showConfirmation && (
+        <div className={styles.confirmationOverlay}>
+          <div className={styles.confirmationDialog}>
+            <p className={styles.confirmationText}>
+              End current chat and start a new conversation?
+            </p>
+            <div className={styles.confirmationButtons}>
+              <button
+                className={styles.cancelButton}
+                onClick={handleCancelNewChat}
+                type="button"
+              >
+                Cancel
+              </button>
+              <button
+                className={styles.confirmButton}
+                onClick={handleConfirmNewChat}
+                type="button"
+              >
+                End Chat
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
-
