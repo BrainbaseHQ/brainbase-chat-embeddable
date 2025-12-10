@@ -22,6 +22,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   primaryColor,
   agentName,
   welcomeMessage,
+  showBranding,
   className,
   onSessionStart,
   onSessionEnd,
@@ -59,6 +60,10 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
         primaryColor: primaryColor ?? deploymentConfig.primaryColor,
         agentName: agentName ?? deploymentConfig.agentName,
         welcomeMessage: welcomeMessage ?? deploymentConfig.welcomeMessage,
+        styling: {
+          ...(deploymentConfig.styling ?? {}),
+          ...(showBranding !== undefined ? { showBranding } : {}),
+        },
       });
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to load config');
@@ -82,6 +87,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
           flowId: 'mock-flow',
           primaryColor: primaryColor ?? '#1a1a2e',
           agentName: agentName ?? 'AI Assistant',
+          styling: showBranding !== undefined ? { showBranding } : undefined,
         });
         setErrorType(null);
       }
@@ -107,8 +113,14 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
       primaryColor,
       agentName,
       welcomeMessage,
+      styling:
+        showBranding !== undefined
+          ? {
+              showBranding,
+            }
+          : undefined,
     };
-  }, [config, embedId, primaryColor, agentName, welcomeMessage]);
+  }, [config, embedId, primaryColor, agentName, welcomeMessage, showBranding]);
 
   const chat = useChat({
     config: chatConfig,

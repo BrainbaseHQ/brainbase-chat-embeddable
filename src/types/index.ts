@@ -89,6 +89,9 @@ export interface ChatWidgetProps {
   /** Override welcome message */
   welcomeMessage?: string;
 
+  /** Override branding visibility */
+  showBranding?: boolean;
+
   /** Custom CSS class */
   className?: string;
 
