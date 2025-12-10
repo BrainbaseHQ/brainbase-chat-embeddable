@@ -44,6 +44,7 @@
   },
   "files": [
     "dist",
+    "styles.css",
     "README.md",
     "LICENSE"
   ],
@@ -53,7 +54,7 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && npm run build:embed",
+    "build": "tsc && vite build && npm run build:embed && node scripts/copy-styles.mjs",
     "build:lib": "tsc && vite build",
     "build:embed": "vite build --config vite.embed.config.ts",
     "preview": "vite preview",
