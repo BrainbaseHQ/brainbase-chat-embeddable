@@ -40,7 +40,7 @@ const DEFAULT_MOCK_RESPONSES: MockResponse[] = [
   {
     trigger: /help|support/i,
     response:
-      "I'm here to help! You can ask me questions, and I'll do my best to assist you. In production, I'd be connected to your Brainbase AI agent with full capabilities.",
+      "I'm here to help! You can ask me questions, and I'll do my best to assist you. In production, I'd be connected to your agent with full capabilities.",
     delay: 600,
   },
   {
@@ -64,7 +64,7 @@ const DEFAULT_MOCK_RESPONSES: MockResponse[] = [
   {
     trigger: /.*/,
     response:
-      "I'm running in mock mode. This is a simulated response to demonstrate the chat UI. In production, I'd be connected to your Brainbase AI agent!",
+      "I'm running in mock mode. This is a simulated response to demonstrate the chat UI. In production, I'd be connected to your agent!",
     delay: 1000,
   },
 ];
