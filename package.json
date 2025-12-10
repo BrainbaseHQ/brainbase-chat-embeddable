@@ -4,13 +4,13 @@
   "description": "A React chat widget for embedding Brainbase Labs AI agents in your applications",
   "author": "Brainbase Labs <hello@brainbaselabs.com>",
   "license": "MIT",
-  "homepage": "https://github.com/brainbase-labs/chat-widget#readme",
+  "homepage": "https://github.com/BrainbaseHQ/brainbase-chat-embeddable#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/brainbase-labs/chat-widget.git"
+    "url": "git+https://github.com/BrainbaseHQ/brainbase-chat-embeddable.git"
   },
   "bugs": {
-    "url": "https://github.com/brainbase-labs/chat-widget/issues"
+    "url": "https://github.com/BrainbaseHQ/brainbase-chat-embeddable/issues"
   },
   "keywords": [
     "react",
