@@ -7,7 +7,7 @@ import styles from './MessageList.module.css';
 
 export interface MessageListProps {
   messages: MessageType[];
-  toolCalls: ToolCall[];
+  toolCalls?: ToolCall[];
   isLoading: boolean;
   agentName?: string;
   agentLogoUrl?: string;
@@ -15,7 +15,7 @@ export interface MessageListProps {
 
 export const MessageList: React.FC<MessageListProps> = ({
   messages,
-  toolCalls,
+  toolCalls = [],
   isLoading,
   agentName,
   agentLogoUrl,
