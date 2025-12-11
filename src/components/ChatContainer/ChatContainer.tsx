@@ -9,7 +9,7 @@ import styles from './ChatContainer.module.css';
 export interface ChatContainerProps {
   config: DeploymentConfig;
   messages: Message[];
-  toolCalls: ToolCall[];
+  toolCalls?: ToolCall[];
   isLoading: boolean;
   onSendMessage: (message: string) => void;
   onClose?: () => void;
@@ -19,7 +19,7 @@ export interface ChatContainerProps {
 export const ChatContainer: React.FC<ChatContainerProps> = ({
   config,
   messages,
-  toolCalls,
+  toolCalls = [],
   isLoading,
   onSendMessage,
   onClose,
