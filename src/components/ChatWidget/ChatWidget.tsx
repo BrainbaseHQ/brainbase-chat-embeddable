@@ -9,6 +9,7 @@ import { ErrorState } from '../ErrorState';
 import styles from './ChatWidget.module.css';
 
 const DEFAULT_ENGINE_URL = 'https://whatsapp-based-server.onrender.com';
+// const DEFAULT_ENGINE_URL = 'http://localhost:8000';
 
 type ErrorType = 'not_found' | 'network' | 'unknown' | null;
 
@@ -205,7 +206,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
         <ChatContainer
           config={chatConfig}
           messages={chat.messages}
-          toolCalls={chat.toolCalls}
+          // toolCalls={chat.toolCalls} // Disabled tool running UI
           isLoading={chat.isLoading}
           onSendMessage={chat.sendMessage}
           onClose={isInline ? undefined : handleClose}
