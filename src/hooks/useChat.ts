@@ -118,13 +118,31 @@ export function useChat(options: UseChatOptions): UseChatReturn {
           // Agent message
           const data = event.data as { content: string; role?: string };
           if (data.content) {
-            setMessages((prev) =>
-              prev.map((m) =>
+            setMessages((prev) => {
+              const currentMsg = prev.find((m) => m.id === messageId);
+              // If the placeholder already has content, create a new message
+              if (currentMsg && currentMsg.content) {
+                const newMessageId = `assistant-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+                return [
+                  ...prev.map((m) =>
+                    m.id === messageId ? { ...m, status: 'sent' as const } : m
+                  ),
+                  {
+                    id: newMessageId,
+                    role: 'assistant' as const,
+                    content: data.content,
+                    timestamp: Date.now(),
+                    status: 'streaming' as const,
+                  },
+                ];
+              }
+              // Otherwise, update the existing placeholder
+              return prev.map((m) =>
                 m.id === messageId
                   ? { ...m, content: data.content, status: 'streaming' as const }
                   : m
-              )
-            );
+              );
+            });
           }
           break;
         }
