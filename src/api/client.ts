@@ -4,7 +4,7 @@ import type {
   SendMessageParams,
 } from '../types';
 
-const DEFAULT_ENGINE_URL = 'https://whatsapp-based-server.onrender.com';
+export const DEFAULT_ENGINE_URL = 'https://whatsapp-based-server.onrender.com';
 // const DEFAULT_ENGINE_URL = 'http://localhost:8000';
 
 export function createAPIClient(
