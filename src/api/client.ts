@@ -4,8 +4,10 @@ import type {
   SendMessageParams,
 } from '../types';
 
-export const DEFAULT_ENGINE_URL = 'https://whatsapp-based-server.onrender.com';
-// const DEFAULT_ENGINE_URL = 'http://localhost:8000';
+// TODO: CHAT_EMBED_ENGINE_URL - Update this when chat embed deployment service is live
+// Current: Using WhatsApp deployments server URL (chat embed should be deployed similarly)
+export const DEFAULT_ENGINE_URL = 'https://deployments-z71a.onrender.com';
+// const DEFAULT_ENGINE_URL = 'http://localhost:8003';
 
 export function createAPIClient(
   engineBaseUrl: string = DEFAULT_ENGINE_URL
