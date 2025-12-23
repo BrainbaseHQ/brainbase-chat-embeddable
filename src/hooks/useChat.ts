@@ -115,13 +115,31 @@ export function useChat(options: UseChatOptions): UseChatReturn {
           break;
         }
         case 'message': {
-          // Agent message
+          // Full agent message (legacy - used for complete message)
           const data = event.data as { content: string; role?: string };
           if (data.content) {
             setMessages((prev) =>
               prev.map((m) =>
                 m.id === messageId
                   ? { ...m, content: data.content, status: 'streaming' as const }
+                  : m
+              )
+            );
+          }
+          break;
+        }
+        case 'chunk': {
+          // Streaming chunk - append content as it arrives
+          const data = event.data as { content: string; role?: string; type?: string };
+          if (data.content) {
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === messageId
+                  ? { 
+                      ...m, 
+                      content: m.content + data.content, 
+                      status: 'streaming' as const 
+                    }
                   : m
               )
             );
