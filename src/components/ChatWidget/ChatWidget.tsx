@@ -7,9 +7,7 @@ import { ChatContainer } from '../ChatContainer';
 import { ChatToggleButton } from '../ChatToggleButton';
 import { ErrorState } from '../ErrorState';
 import styles from './ChatWidget.module.css';
-
-const DEFAULT_ENGINE_URL = 'https://whatsapp-based-server.onrender.com';
-// const DEFAULT_ENGINE_URL = 'http://localhost:8000';
+  import { DEFAULT_ENGINE_URL } from '../../api/client';
 
 type ErrorType = 'not_found' | 'network' | 'unknown' | null;
 
