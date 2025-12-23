@@ -35,7 +35,8 @@ export interface ToolCall {
 // SSE Event types (from messaging server)
 export type SSEEventType =
   | 'session' // Session info (session_id, is_new)
-  | 'message' // Agent text response (content, role)
+  | 'message' // Full agent text response (content, role) - legacy
+  | 'chunk' // Streaming chunk (content, role, type) - token-by-token streaming
   | 'tool_call' // Tool/function execution
   | 'waiting' // Agent is processing
   | 'done' // Stream complete

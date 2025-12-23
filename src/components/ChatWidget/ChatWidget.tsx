@@ -7,7 +7,8 @@ import { ChatContainer } from '../ChatContainer';
 import { ChatToggleButton } from '../ChatToggleButton';
 import { ErrorState } from '../ErrorState';
 import styles from './ChatWidget.module.css';
-  import { DEFAULT_ENGINE_URL } from '../../api/client';
+import { DEFAULT_ENGINE_URL } from '../../api/client';
+
 
 type ErrorType = 'not_found' | 'network' | 'unknown' | null;
 
