@@ -5,7 +5,7 @@ import type {
 } from '../types';
 
 export const DEFAULT_ENGINE_URL = 'https://chat-embed-deployment.onrender.com';
-// const DEFAULT_ENGINE_URL = 'http://localhost:8003';
+// export const DEFAULT_ENGINE_URL = 'http://localhost:8003';
 
 export function createAPIClient(
   engineBaseUrl: string = DEFAULT_ENGINE_URL
