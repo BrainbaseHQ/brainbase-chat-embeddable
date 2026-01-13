@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
 import type { Message as MessageType } from '../../types';
 import { BrainbaseLogo } from '../BrainbaseLogo';
 import styles from './Message.module.css';
@@ -42,8 +43,12 @@ export const Message: React.FC<MessageProps> = ({
         role="article"
         aria-label={`${isUser ? 'Your message' : `${agentName || 'AI'} says`}`}
       >
-        <div className={styles.content}>
-          {message.content}
+        <div className={`${styles.content} ${!isUser ? styles.markdown : ''}`}>
+          {isUser ? (
+            message.content
+          ) : (
+            <ReactMarkdown>{message.content}</ReactMarkdown>
+          )}
           {isStreaming && <span className={styles.cursor} />}
         </div>
         {isError && (
