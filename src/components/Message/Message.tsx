@@ -47,7 +47,17 @@ export const Message: React.FC<MessageProps> = ({
           {isUser ? (
             message.content
           ) : (
-            <ReactMarkdown>{message.content}</ReactMarkdown>
+            <ReactMarkdown
+              components={{
+                a: ({ href, children }) => (
+                  <a href={href} target="_blank" rel="noopener noreferrer">
+                    {children}
+                  </a>
+                ),
+              }}
+            >
+              {message.content}
+            </ReactMarkdown>
           )}
           {isStreaming && <span className={styles.cursor} />}
         </div>
