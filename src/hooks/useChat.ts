@@ -55,6 +55,7 @@ export function useChat(options: UseChatOptions): UseChatReturn {
 
   const sessionStartTime = useRef<number>(0);
   const isInitialized = useRef(false);
+  const streamBuffers = useRef<Record<string, string>>({});
 
   // Initialize or restore session
   useEffect(() => {
@@ -99,6 +100,31 @@ export function useChat(options: UseChatOptions): UseChatReturn {
     return '';
   }, [config.embedId]);
 
+  const upsertAssistantMessage = useCallback((messageId: string, content: string) => {
+    setMessages((prev) => {
+      let found = false;
+      const next = prev.map((m) => {
+        if (m.id === messageId) {
+          found = true;
+          return { ...m, content, status: 'streaming' as const };
+        }
+        return m;
+      });
+
+      if (!found) {
+        next.push({
+          id: messageId,
+          role: 'assistant',
+          content,
+          timestamp: Date.now(),
+          status: 'streaming',
+        });
+      }
+
+      return next;
+    });
+  }, []);
+
   const handleSSEEvent = useCallback(
     (event: SSEEvent, messageId: string, updateSessionId: (id: string) => void) => {
       switch (event.type) {
@@ -118,13 +144,8 @@ export function useChat(options: UseChatOptions): UseChatReturn {
           // Agent message (complete message, e.g., from say())
           const data = event.data as { content: string; role?: string };
           if (data.content) {
-            setMessages((prev) =>
-              prev.map((m) =>
-                m.id === messageId
-                  ? { ...m, content: data.content, status: 'streaming' as const }
-                  : m
-              )
-            );
+            streamBuffers.current[messageId] = data.content;
+            upsertAssistantMessage(messageId, data.content);
           }
           break;
         }
@@ -132,13 +153,10 @@ export function useChat(options: UseChatOptions): UseChatReturn {
           // Streaming chunk - append to existing message content
           const data = event.data as { content: string };
           if (data.content) {
-            setMessages((prev) =>
-              prev.map((m) =>
-                m.id === messageId
-                  ? { ...m, content: m.content + data.content, status: 'streaming' as const }
-                  : m
-              )
-            );
+            const current = streamBuffers.current[messageId] ?? '';
+            const next = current + data.content;
+            streamBuffers.current[messageId] = next;
+            upsertAssistantMessage(messageId, next);
           }
           break;
         }
@@ -185,13 +203,9 @@ export function useChat(options: UseChatOptions): UseChatReturn {
 
           // If tool call has content, also update the message
           if (data.content) {
-            setMessages((prev) =>
-              prev.map((m) =>
-                m.id === messageId
-                  ? { ...m, content: data.content as string, status: 'streaming' as const }
-                  : m
-              )
-            );
+            const content = data.content as string;
+            streamBuffers.current[messageId] = content;
+            upsertAssistantMessage(messageId, content);
           }
           break;
         }
@@ -204,26 +218,31 @@ export function useChat(options: UseChatOptions): UseChatReturn {
           setMessages((prev) =>
             prev.map((m) => (m.id === messageId ? { ...m, status: 'sent' as const } : m))
           );
+          delete streamBuffers.current[messageId];
           break;
         }
         case 'completed': {
           // Conversation ended by agent
-          setMessages((prev) =>
-            prev.map((m) => (m.id === messageId ? { ...m, status: 'sent' as const } : m))
-          );
-          // Mark session as completed
-          if (sessionId) {
-            storeSession(config.embedId, {
-              sessionId,
-              deploymentId: config.deploymentId,
-              workerId: config.workerId,
-              flowId: config.flowId,
-              startTime: sessionStartTime.current,
-              messages,
-              toolCalls,
-              status: 'completed',
-            });
-          }
+          setMessages((prev) => {
+            const updatedMessages = prev.map((m) =>
+              m.id === messageId ? { ...m, status: 'sent' as const } : m
+            );
+            // Mark session as completed with current messages
+            if (sessionId) {
+              storeSession(config.embedId, {
+                sessionId,
+                deploymentId: config.deploymentId,
+                workerId: config.workerId,
+                flowId: config.flowId,
+                startTime: sessionStartTime.current,
+                messages: updatedMessages,
+                toolCalls: [], // Tool calls stored separately
+                status: 'completed',
+              });
+            }
+            return updatedMessages;
+          });
+          delete streamBuffers.current[messageId];
           break;
         }
         case 'error': {
@@ -243,7 +262,7 @@ export function useChat(options: UseChatOptions): UseChatReturn {
         }
       }
     },
-    [config, sessionId, messages, toolCalls, onSessionStart]
+    [config, sessionId, onSessionStart, upsertAssistantMessage]
   );
 
   const processSSEStream = useCallback(
@@ -260,9 +279,12 @@ export function useChat(options: UseChatOptions): UseChatReturn {
           buffer += decoder.decode(value, { stream: true });
           
           // SSE messages are separated by double newlines
-          while (buffer.includes('\n\n')) {
-            const [message, rest] = buffer.split('\n\n', 2);
-            buffer = rest;
+          // Note: We use indexOf instead of split with limit because split(str, 2)
+          // only returns 2 elements and discards the rest, causing dropped chunks
+          let idx: number;
+          while ((idx = buffer.indexOf('\n\n')) !== -1) {
+            const message = buffer.slice(0, idx);
+            buffer = buffer.slice(idx + 2);
 
             // Parse SSE data lines
             for (const line of message.split('\n')) {
