@@ -36,6 +36,7 @@ export interface ToolCall {
 export type SSEEventType =
   | 'session' // Session info (session_id, is_new)
   | 'message' // Agent text response (content, role)
+  | 'chunk' // Streaming chunk (token-by-token content)
   | 'tool_call' // Tool/function execution
   | 'waiting' // Agent is processing
   | 'done' // Stream complete
