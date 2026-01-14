@@ -49,11 +49,14 @@ export const Message: React.FC<MessageProps> = ({
           ) : (
             <ReactMarkdown
               components={{
-                a: ({ href, children }) => (
-                  <a href={href} target="_blank" rel="noopener noreferrer">
-                    {children}
-                  </a>
-                ),
+                a: ({ href, children }) =>
+                  href ? (
+                    <a href={href} target="_blank" rel="noopener noreferrer">
+                      {children}
+                    </a>
+                  ) : (
+                    <>{children}</>
+                  ),
               }}
             >
               {message.content}
