@@ -1,6 +1,6 @@
 {
   "name": "@brainbase-labs/chat-widget",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "A React chat widget for embedding Brainbase Labs AI agents in your applications",
   "author": "Brainbase Labs <hello@brainbaselabs.com>",
   "license": "MIT",
