@@ -87,6 +87,9 @@ export interface ChatWidgetProps {
   /** Override agent name */
   agentName?: string;
 
+  /** Override agent logo URL */
+  agentLogoUrl?: string;
+
   /** Override welcome message */
   welcomeMessage?: string;
 

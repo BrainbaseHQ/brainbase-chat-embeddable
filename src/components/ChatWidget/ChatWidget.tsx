@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import type { ChatWidgetProps, DeploymentConfig } from '../../types';
 import { useChat } from '../../hooks/useChat';
 import { createAPIClient } from '../../api/client';
@@ -7,7 +7,7 @@ import { ChatContainer } from '../ChatContainer';
 import { ChatToggleButton } from '../ChatToggleButton';
 import { ErrorState } from '../ErrorState';
 import styles from './ChatWidget.module.css';
-  import { DEFAULT_ENGINE_URL } from '../../api/client';
+import { DEFAULT_ENGINE_URL } from '../../api/client';
 
 type ErrorType = 'not_found' | 'network' | 'unknown' | null;
 
@@ -20,6 +20,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   defaultOpen = false,
   primaryColor,
   agentName,
+  agentLogoUrl,
   welcomeMessage,
   showBranding,
   className,
@@ -29,41 +30,38 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   onError,
 }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
-  const [config, setConfig] = useState<DeploymentConfig | null>(null);
+  const [baseConfig, setBaseConfig] = useState<DeploymentConfig | null>(null);
   const [isLoadingConfig, setIsLoadingConfig] = useState(true);
   const [errorType, setErrorType] = useState<ErrorType>(null);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
+  
+  // Track if initial config has been loaded to prevent re-renders
+  const hasLoadedConfig = useRef(false);
 
-  // Create API client based on mode
+  // Create API client based on mode - NOT dependent on styling props
   const apiClient = useMemo(() => {
     if (mockMode) {
-      return createMockAPIClient(
-        { primaryColor, agentName, welcomeMessage },
-        mockResponses
-      );
+      // Pass empty config to mock client - we'll apply overrides via effectiveConfig
+      return createMockAPIClient({}, mockResponses);
     }
     return createAPIClient(apiBaseUrl);
-  }, [mockMode, primaryColor, agentName, welcomeMessage, mockResponses, apiBaseUrl]);
+  }, [mockMode, mockResponses, apiBaseUrl]);
 
-  // Fetch deployment config
+  // Fetch deployment config - only when embedId or mockMode changes
   const fetchConfig = useCallback(async () => {
+    // Skip if already loaded and not a forced refresh
+    if (hasLoadedConfig.current && baseConfig) {
+      return;
+    }
+    
     setIsLoadingConfig(true);
     setErrorType(null);
     setErrorMessage(undefined);
 
     try {
       const deploymentConfig = await apiClient.getDeploymentConfig(embedId);
-      setConfig({
-        ...deploymentConfig,
-        // Allow prop overrides
-        primaryColor: primaryColor ?? deploymentConfig.primaryColor,
-        agentName: agentName ?? deploymentConfig.agentName,
-        welcomeMessage: welcomeMessage ?? deploymentConfig.welcomeMessage,
-        styling: {
-          ...(deploymentConfig.styling ?? {}),
-          ...(showBranding !== undefined ? { showBranding } : {}),
-        },
-      });
+      setBaseConfig(deploymentConfig);
+      hasLoadedConfig.current = true;
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to load config');
       
@@ -79,50 +77,56 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
 
       // In mock mode, use default config on error
       if (mockMode) {
-        setConfig({
+        setBaseConfig({
           embedId,
           deploymentId: 'mock-deployment',
           workerId: 'mock-worker',
           flowId: 'mock-flow',
-          primaryColor: primaryColor ?? '#1a1a2e',
-          agentName: agentName ?? 'AI Assistant',
-          styling: showBranding !== undefined ? { showBranding } : undefined,
+          primaryColor: '#1a1a2e',
+          agentName: 'AI Assistant',
+          styling: {},
         });
         setErrorType(null);
+        hasLoadedConfig.current = true;
       }
 
       onError?.(error);
     } finally {
       setIsLoadingConfig(false);
     }
-  }, [embedId, mockMode, apiClient, primaryColor, agentName, welcomeMessage, onError]);
+  }, [embedId, mockMode, apiClient, onError, baseConfig]);
 
+  // Only fetch on mount or when embedId changes
   useEffect(() => {
+    hasLoadedConfig.current = false;
     fetchConfig();
-  }, [fetchConfig]);
+  }, [embedId, mockMode, apiClient]);
 
-  // Create a stable config for useChat
-  const chatConfig = useMemo((): DeploymentConfig => {
-    if (config) return config;
-    return {
+  // Effective config: base config + prop overrides (updates instantly without re-fetch)
+  const effectiveConfig = useMemo((): DeploymentConfig => {
+    const base = baseConfig ?? {
       embedId,
       deploymentId: '',
       workerId: '',
       flowId: '',
-      primaryColor,
-      agentName,
-      welcomeMessage,
-      styling:
-        showBranding !== undefined
-          ? {
-              showBranding,
-            }
-          : undefined,
     };
-  }, [config, embedId, primaryColor, agentName, welcomeMessage, showBranding]);
+    
+    return {
+      ...base,
+      // Apply prop overrides - these update instantly without triggering re-fetch
+      primaryColor: primaryColor ?? base.primaryColor ?? '#1a1a2e',
+      agentName: agentName ?? base.agentName,
+      agentLogoUrl: agentLogoUrl ?? base.agentLogoUrl,
+      welcomeMessage: welcomeMessage ?? base.welcomeMessage,
+      styling: {
+        ...(base.styling ?? {}),
+        ...(showBranding !== undefined ? { showBranding } : {}),
+      },
+    };
+  }, [baseConfig, embedId, primaryColor, agentName, agentLogoUrl, welcomeMessage, showBranding]);
 
   const chat = useChat({
-    config: chatConfig,
+    config: effectiveConfig,
     apiClient,
     mockMode,
     onSessionStart,
@@ -131,13 +135,13 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
     onError,
   });
 
-  // CSS custom properties for theming
+  // CSS custom properties for theming - uses effectiveConfig for instant updates
   const themeStyle = useMemo(
     () =>
       ({
-        '--bb-primary-color': config?.primaryColor ?? primaryColor ?? '#1a1a2e',
+        '--bb-primary-color': effectiveConfig.primaryColor ?? '#1a1a2e',
       }) as React.CSSProperties,
-    [config?.primaryColor, primaryColor]
+    [effectiveConfig.primaryColor]
   );
 
   // Handle new chat
@@ -202,7 +206,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
     >
       {isOpen || isInline ? (
         <ChatContainer
-          config={chatConfig}
+          config={effectiveConfig}
           messages={chat.messages}
           // toolCalls={chat.toolCalls} // Disabled tool running UI
           isLoading={chat.isLoading}
@@ -213,8 +217,8 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
       ) : (
         <ChatToggleButton
           onClick={() => setIsOpen(true)}
-          agentName={config?.agentName}
-          agentLogoUrl={config?.agentLogoUrl}
+          agentName={effectiveConfig.agentName}
+          agentLogoUrl={effectiveConfig.agentLogoUrl}
         />
       )}
     </div>
