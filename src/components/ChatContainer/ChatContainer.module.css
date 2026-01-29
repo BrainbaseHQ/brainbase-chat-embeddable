@@ -9,6 +9,7 @@
   border-radius: var(--bb-radius-xl);
   box-shadow: var(--bb-shadow-xl);
   overflow: hidden;
+  overscroll-behavior: contain;
   animation: slideUp 0.3s ease;
 }
 
@@ -28,6 +29,8 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow: hidden;
+  overscroll-behavior: contain;
   background: var(--bb-surface-bg);
 }
 

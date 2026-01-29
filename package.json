@@ -55,6 +55,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && node scripts/copy-styles.mjs && npm run build:embed",
+    "build:dev": "npm run build && cp styles.css ../client_v2/brainbase/app/chat-widget.css",
     "build:lib": "tsc && vite build",
     "build:embed": "vite build --config vite.embed.config.ts",
     "preview": "vite preview",

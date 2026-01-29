@@ -22,11 +22,28 @@ export const MessageList: React.FC<MessageListProps> = ({
 }) => {
   const listRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const prevMessageCountRef = useRef(messages.length);
+  const prevToolCallCountRef = useRef(toolCalls.length);
 
-  // Auto-scroll to bottom on new messages
+  // Auto-scroll to bottom only when new messages/tool calls are added
+  // Using scrollTop instead of scrollIntoView to avoid scrolling parent containers
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, toolCalls, isLoading]);
+    const hasNewMessages = messages.length > prevMessageCountRef.current;
+    const hasNewToolCalls = toolCalls.length > prevToolCallCountRef.current;
+    
+    if (hasNewMessages || hasNewToolCalls || (isLoading && messages.length > 0)) {
+      const list = listRef.current;
+      if (list) {
+        list.scrollTo({
+          top: list.scrollHeight,
+          behavior: 'smooth',
+        });
+      }
+    }
+    
+    prevMessageCountRef.current = messages.length;
+    prevToolCallCountRef.current = toolCalls.length;
+  }, [messages.length, toolCalls.length, isLoading]);
 
   // Filter tool calls that are currently executing
   const activeToolCalls = toolCalls.filter(
