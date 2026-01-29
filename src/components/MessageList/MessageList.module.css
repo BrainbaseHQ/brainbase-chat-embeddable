@@ -1,6 +1,7 @@
 .messageList {
   flex: 1;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: var(--bb-spacing-xl);
   display: flex;
   flex-direction: column;
