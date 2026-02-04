@@ -1,0 +1,113 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #0a0a0f;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Three.js orb container */
+.orbContainer {
+  flex: 1;
+  cursor: pointer;
+  min-height: 200px;
+}
+
+.orbContainer canvas {
+  display: block;
+}
+
+/* Status text at top */
+.status {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: var(--bb-font-size-sm);
+  z-index: 10;
+  text-align: center;
+}
+
+/* Instruction text */
+.instruction {
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: var(--bb-font-size-sm);
+  z-index: 10;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* Controls at bottom */
+.controls {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--bb-spacing-md);
+  z-index: 10;
+}
+
+.controlButton {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--bb-radius-full);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, background 0.15s ease;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.controlButton:hover {
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.controlButton:active {
+  transform: scale(0.95);
+}
+
+.controlButton svg {
+  width: 24px;
+  height: 24px;
+}
+
+.controlButton.muted {
+  background: rgba(239, 68, 68, 0.8);
+}
+
+.controlButton.muted:hover {
+  background: rgb(239, 68, 68);
+}
+
+/* Back to chat button */
+.backButton {
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: var(--bb-radius-full);
+  color: white;
+  font-size: var(--bb-font-size-sm);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.backButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.02);
+}
+
+.backButton:active {
+  transform: scale(0.98);
+}

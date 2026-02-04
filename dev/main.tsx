@@ -27,6 +27,14 @@ const TEST_CONFIG = {
   // Auto-open after 3 seconds and send trigger message
   timeToOpen: 3,
   
+  // Voice mode configuration
+  voiceTokenUrl: 'https://lk-demo-beta.vercel.app/api/token',
+  voiceAgentName: 'voice-agent',
+  enableVoiceMode: true,
+  
+  // Show collapse button when widget is open (default: true)
+  showCollapseButton: true,
+  
   // Optional overrides (leave undefined to use values from API/database)
   // primaryColor: '#1a1a2e',
   // agentName: 'Test Agent',
@@ -44,6 +52,10 @@ function App() {
       position={TEST_CONFIG.position}
       theme={TEST_CONFIG.theme}
       timeToOpen={TEST_CONFIG.timeToOpen}
+      voiceTokenUrl={TEST_CONFIG.voiceTokenUrl}
+      voiceAgentName={TEST_CONFIG.voiceAgentName}
+      enableVoiceMode={TEST_CONFIG.enableVoiceMode}
+      showCollapseButton={TEST_CONFIG.showCollapseButton}
       onSessionStart={(sessionId) => console.log('Session started:', sessionId)}
       onSessionEnd={(session) => console.log('Session ended:', session)}
       onMessage={(message) => console.log('Message:', message)}

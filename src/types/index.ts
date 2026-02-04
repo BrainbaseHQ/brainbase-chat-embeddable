@@ -122,6 +122,19 @@ export interface ChatWidgetProps {
    * message to trigger the agent. Default: undefined (never auto-opens) */
   timeToOpen?: number;
 
+  /** URL for the LiveKit token endpoint (e.g., 'https://your-app.com/api/token').
+   * Required for voice mode to work. */
+  voiceTokenUrl?: string;
+
+  /** Agent name for voice mode dispatch. Default: 'voice-agent' */
+  voiceAgentName?: string;
+
+  /** Enable voice mode (audio button in input). Default: false */
+  enableVoiceMode?: boolean;
+
+  /** Show the collapse button (circle with down arrow) when widget is open. Default: true */
+  showCollapseButton?: boolean;
+
   /** Override agent name */
   agentName?: string;
 

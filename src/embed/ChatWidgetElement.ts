@@ -50,6 +50,10 @@ class ChatWidgetElement extends HTMLElement {
       'home-title',
       'home-description',
       'time-to-open',
+      'voice-token-url',
+      'voice-agent-name',
+      'enable-voice-mode',
+      'show-collapse-button',
     ];
   }
 
@@ -124,6 +128,10 @@ class ChatWidgetElement extends HTMLElement {
       homeTitle: this.getAttribute('home-title') || undefined,
       homeDescription: this.getAttribute('home-description') || undefined,
       timeToOpen: timeToOpenAttr ? parseFloat(timeToOpenAttr) : undefined,
+      voiceTokenUrl: this.getAttribute('voice-token-url') || undefined,
+      voiceAgentName: this.getAttribute('voice-agent-name') || undefined,
+      enableVoiceMode: this.getAttribute('enable-voice-mode') === 'true',
+      showCollapseButton: this.getAttribute('show-collapse-button') !== 'false',
       agentName: this.getAttribute('agent-name') || undefined,
       agentRole: this.getAttribute('agent-role') || undefined,
       headerSubtitle: this.getAttribute('header-subtitle') || undefined,

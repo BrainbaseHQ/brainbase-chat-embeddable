@@ -32,6 +32,10 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   homeTitle,
   homeDescription,
   timeToOpen,
+  voiceTokenUrl,
+  voiceAgentName = 'voice-agent',
+  enableVoiceMode = false,
+  showCollapseButton = true,
   agentName,
   agentRole,
   headerSubtitle,
@@ -329,6 +333,9 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
               showTypingIndicator={chat.showTypingIndicator}
               isExpanded={isExpanded}
               headerSubtitle={headerSubtitle}
+              voiceTokenUrl={voiceTokenUrl}
+              voiceAgentName={voiceAgentName}
+              enableVoiceMode={enableVoiceMode}
               onSendMessage={chat.sendMessage}
               onClose={isInline ? undefined : handleClose}
               onBack={handleBack}
@@ -337,7 +344,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
             />
           )}
           {/* Collapse button below chat */}
-          {!isInline && (
+          {!isInline && showCollapseButton && (
             <button
               className={styles.collapseButton}
               onClick={handleClose}

@@ -11,6 +11,7 @@ export { MessageInput } from './MessageInput';
 export { PoweredBy } from './PoweredBy';
 export { ToolCallDisplay } from './ToolCallDisplay';
 export { TypingIndicator } from './TypingIndicator';
+export { VoiceMode } from './VoiceMode';
 
 export type { ChatContainerProps } from './ChatContainer';
 export type { ChatHeaderProps } from './ChatHeader';
@@ -23,3 +24,4 @@ export type { MessageListProps } from './MessageList';
 export type { MessageInputProps } from './MessageInput';
 export type { ToolCallDisplayProps } from './ToolCallDisplay';
 export type { TypingIndicatorProps } from './TypingIndicator';
+export type { VoiceModeProps } from './VoiceMode';
