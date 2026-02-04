@@ -117,6 +117,9 @@ export interface ChatWidgetProps {
   /** Home page description text (optional) */
   homeDescription?: string;
 
+  /** URL to open when home page info card is clicked (optional) */
+  homeLink?: string;
+
   /** Time in seconds before the widget auto-opens and sends a trigger message.
    * When set, the widget will automatically open after this delay and send a hidden 
    * message to trigger the agent. Default: undefined (never auto-opens) */

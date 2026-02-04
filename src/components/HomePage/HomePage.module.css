@@ -85,39 +85,92 @@
   gap: var(--bb-spacing-xl);
 }
 
-/* Hero Image Section */
-.heroSection {
+/* Info Card - clickable module below Ask a Question */
+.infoCard {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0;
+  background: var(--bb-surface-secondary);
+  border: 1px solid var(--bb-border-color);
   border-radius: var(--bb-radius-lg);
+  text-align: left;
+  width: 100%;
+  cursor: default;
+  overflow: hidden;
+  transition: background var(--bb-transition-fast), border-color var(--bb-transition-fast), transform var(--bb-transition-fast);
+}
+
+.infoCard.clickable {
+  cursor: pointer;
+}
+
+.infoCard.clickable:hover {
+  background: var(--bb-surface-tertiary);
+  border-color: var(--bb-text-tertiary);
+  transform: translateY(-2px);
+}
+
+.infoCard.clickable:active {
+  transform: translateY(0);
+}
+
+.infoCard:disabled {
+  cursor: default;
+}
+
+.infoImageWrapper {
+  width: 100%;
+  height: 180px;
   overflow: hidden;
 }
 
-.heroImage {
+.infoImage {
   width: 100%;
-  height: auto;
-  display: block;
-  border-radius: var(--bb-radius-lg);
+  height: 100%;
+  object-fit: cover;
 }
 
-/* Info Section */
-.infoSection {
+.infoContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--bb-spacing-lg);
+  gap: var(--bb-spacing-md);
+}
+
+.infoText {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--bb-spacing-sm);
+  gap: 6px;
 }
 
-.title {
+.infoTitle {
   margin: 0;
-  font-size: var(--bb-font-size-xl);
+  font-size: var(--bb-font-size-lg);
   font-weight: var(--bb-font-weight-semibold);
   color: var(--bb-text-primary);
   line-height: 1.3;
 }
 
-.description {
+.infoDescription {
   margin: 0;
-  font-size: var(--bb-font-size-md);
+  font-size: var(--bb-font-size-sm);
   color: var(--bb-text-secondary);
   line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.infoChevron {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  color: var(--bb-text-tertiary);
 }
 
 /* Ask a Question Card */

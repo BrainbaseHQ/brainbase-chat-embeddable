@@ -35,6 +35,12 @@ const TEST_CONFIG = {
   // Show collapse button when widget is open (default: true)
   showCollapseButton: true,
   
+  // Home page configuration
+  homeImage: 'https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=400&h=300&fit=crop',
+  homeTitle: 'Getting Started Guide',
+  homeDescription: 'Learn how to get the most out of our platform with our comprehensive guide.',
+  homeLink: 'https://docs.brainbase.com/getting-started',
+  
   // Optional overrides (leave undefined to use values from API/database)
   // primaryColor: '#1a1a2e',
   // agentName: 'Test Agent',
@@ -56,6 +62,10 @@ function App() {
       voiceAgentName={TEST_CONFIG.voiceAgentName}
       enableVoiceMode={TEST_CONFIG.enableVoiceMode}
       showCollapseButton={TEST_CONFIG.showCollapseButton}
+      homeImage={TEST_CONFIG.homeImage}
+      homeTitle={TEST_CONFIG.homeTitle}
+      homeDescription={TEST_CONFIG.homeDescription}
+      homeLink={TEST_CONFIG.homeLink}
       onSessionStart={(sessionId) => console.log('Session started:', sessionId)}
       onSessionEnd={(session) => console.log('Session ended:', session)}
       onMessage={(message) => console.log('Message:', message)}

@@ -31,6 +31,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   homeImage,
   homeTitle,
   homeDescription,
+  homeLink,
   timeToOpen,
   voiceTokenUrl,
   voiceAgentName = 'voice-agent',
@@ -320,6 +321,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
               homeImage={homeImage}
               homeTitle={homeTitle}
               homeDescription={homeDescription}
+              homeLink={homeLink}
               onStartChat={handleStartChat}
               onNavigate={handleNavigate}
               currentPage="home"

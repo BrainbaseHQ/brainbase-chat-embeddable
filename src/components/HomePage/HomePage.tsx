@@ -8,6 +8,7 @@ export interface HomePageProps {
   homeImage?: string;
   homeTitle?: string;
   homeDescription?: string;
+  homeLink?: string;
   onStartChat: () => void;
   onNavigate: (page: 'home' | 'messages') => void;
   currentPage: 'home' | 'messages';
@@ -19,10 +20,16 @@ export const HomePage: React.FC<HomePageProps> = ({
   homeImage,
   homeTitle,
   homeDescription,
+  homeLink,
   onStartChat,
   onNavigate,
   currentPage,
 }) => {
+  const handleHomeCardClick = () => {
+    if (homeLink) {
+      window.open(homeLink, '_blank', 'noopener,noreferrer');
+    }
+  };
   return (
     <div className={styles.container}>
       {/* Header */}
@@ -43,21 +50,6 @@ export const HomePage: React.FC<HomePageProps> = ({
       </div>
 
       <div className={styles.content}>
-        {/* Hero Image Section */}
-        {homeImage && (
-          <div className={styles.heroSection}>
-            <img src={homeImage} alt="" className={styles.heroImage} />
-          </div>
-        )}
-
-        {/* Title and Description */}
-        {(homeTitle || homeDescription) && (
-          <div className={styles.infoSection}>
-            {homeTitle && <h2 className={styles.title}>{homeTitle}</h2>}
-            {homeDescription && <p className={styles.description}>{homeDescription}</p>}
-          </div>
-        )}
-
         {/* Ask a Question Card */}
         <button className={styles.askCard} onClick={onStartChat} type="button">
           <div className={styles.askContent}>
@@ -81,6 +73,39 @@ export const HomePage: React.FC<HomePageProps> = ({
             </svg>
           </div>
         </button>
+
+        {/* Info Card - clickable module that opens homeLink */}
+        {(homeImage || homeTitle || homeDescription) && (
+          <button
+            className={`${styles.infoCard} ${homeLink ? styles.clickable : ''}`}
+            onClick={homeLink ? handleHomeCardClick : undefined}
+            type="button"
+            disabled={!homeLink}
+          >
+            {homeImage && (
+              <div className={styles.infoImageWrapper}>
+                <img src={homeImage} alt="" className={styles.infoImage} />
+              </div>
+            )}
+            <div className={styles.infoContent}>
+              <div className={styles.infoText}>
+                {homeTitle && <h3 className={styles.infoTitle}>{homeTitle}</h3>}
+                {homeDescription && <p className={styles.infoDescription}>{homeDescription}</p>}
+              </div>
+              {homeLink && (
+                <svg viewBox="0 0 24 24" fill="none" className={styles.infoChevron}>
+                  <path
+                    d="M9 18L15 12L9 6"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              )}
+            </div>
+          </button>
+        )}
       </div>
 
       {/* Footer Navigation */}
