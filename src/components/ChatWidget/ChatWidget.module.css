@@ -2,6 +2,7 @@
   font-family: var(--bb-font-family);
   font-size: var(--bb-font-size-md);
   line-height: var(--bb-line-height);
+  color: var(--bb-text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -36,5 +37,67 @@
     right: 0;
     left: 0;
   }
+}
+
+/* Container for open state with chat + collapse button */
+.openContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--bb-spacing-md);
+}
+
+/* Collapse button (ball) below chat - matches toggle button */
+.collapseButton {
+  position: relative;
+  width: var(--bb-toggle-size);
+  height: var(--bb-toggle-size);
+  border-radius: var(--bb-radius-full);
+  background: var(--bb-accent-color-custom, var(--bb-primary-color));
+  border: none;
+  box-shadow: var(--bb-shadow-lg);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bb-text-inverse);
+  transition: transform var(--bb-transition-normal), box-shadow var(--bb-transition-normal), filter var(--bb-transition-normal);
+  animation: buttonAppear 0.3s ease;
+}
+
+/* Gradient overlay for collapse button */
+.collapseButton::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--bb-radius-full);
+  background: linear-gradient(135deg, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
+  opacity: var(--bb-accent-gradient, 0);
+  pointer-events: none;
+}
+
+@keyframes buttonAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.8) rotate(-90deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.collapseButton:hover {
+  transform: scale(1.05);
+  box-shadow: var(--bb-shadow-xl);
+}
+
+.collapseButton:active {
+  transform: scale(0.95);
+}
+
+.collapseButton svg {
+  width: 28px;
+  height: 28px;
 }
 

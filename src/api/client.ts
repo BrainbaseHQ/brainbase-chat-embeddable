@@ -30,6 +30,7 @@ export function createAPIClient(
         flowId: '',
         welcomeMessage: data.welcomeMessage,
         agentName: data.agentName,
+        agentRole: data.agentRole,
         agentLogoUrl: data.agentLogoUrl,
         primaryColor: data.primaryColor,
         styling: data.styling,

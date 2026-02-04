@@ -57,20 +57,20 @@
 
 .messageBubble {
   padding: var(--bb-spacing-md) var(--bb-spacing-lg);
-  border-radius: var(--bb-radius-lg);
+  border-radius: 22px;
   position: relative;
 }
 
 .user .messageBubble {
   background: var(--bb-user-message-bg);
   color: var(--bb-user-message-text);
-  border-bottom-right-radius: var(--bb-spacing-xs);
+  border-bottom-right-radius: 6px;
 }
 
 .assistant .messageBubble {
   background: var(--bb-assistant-message-bg);
   color: var(--bb-assistant-message-text);
-  border-bottom-left-radius: var(--bb-spacing-xs);
+  border-bottom-left-radius: 6px;
 }
 
 .messageBubble.error {
@@ -79,7 +79,7 @@
 }
 
 .content {
-  font-size: var(--bb-font-size-md);
+  font-size: var(--bb-message-font-size, 15px);
   line-height: var(--bb-line-height);
   word-break: break-word;
 }
@@ -213,3 +213,67 @@
   height: 14px;
 }
 
+/* Clickable message wrapper for older assistant messages - no visual feedback */
+
+/* Message content wrapper for info bar placement */
+.messageContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bb-spacing-xs);
+  min-width: 0;
+}
+
+/* Agent info bar below message */
+.messageInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-spacing-xs);
+  font-size: calc(var(--bb-message-font-size, 15px) - 2px);
+  color: var(--bb-text-tertiary);
+  padding-left: var(--bb-spacing-lg);
+  animation: slideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.messageInfo.fadeOut {
+  animation: slideOut 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.messageInfo .agentName {
+  font-weight: var(--bb-font-weight-medium);
+  color: var(--bb-text-secondary);
+}
+
+.messageInfo .agentRole {
+  color: var(--bb-text-tertiary);
+}
+
+.messageInfo .separator {
+  color: var(--bb-text-tertiary);
+  opacity: 0.6;
+}
+
+.messageInfo .timestamp {
+  color: var(--bb-text-tertiary);
+}

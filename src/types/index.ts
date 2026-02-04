@@ -6,6 +6,7 @@ export interface DeploymentConfig {
   flowId: string;
   welcomeMessage?: string;
   agentName?: string;
+  agentRole?: string;
   agentLogoUrl?: string;
   primaryColor?: string;
   styling?: Record<string, unknown>;
@@ -61,6 +62,9 @@ export interface Session {
   status: 'active' | 'completed' | 'error';
 }
 
+// Theme options
+export type ChatWidgetTheme = 'light' | 'dark' | 'granite';
+
 // Widget props
 export interface ChatWidgetProps {
   /** The embed ID from your Brainbase deployment */
@@ -84,17 +88,97 @@ export interface ChatWidgetProps {
   /** Override primary color */
   primaryColor?: string;
 
+  /** Accent color for buttons and icons - NOT header (defaults to primaryColor) */
+  accentColor?: string;
+
+  /** Use gradient on header (default: false) */
+  primaryGradient?: boolean;
+
+  /** Use gradient on accent elements like buttons and icons (default: false) */
+  accentGradient?: boolean;
+
+  /** Header text color (default: based on theme - black for light/dark, gray for granite) */
+  headerTextColor?: string;
+
+  /** Stream messages token by token (default: false - show full message when complete) */
+  streamMessages?: boolean;
+
+  /** Artificial delay range in seconds [min, max] for typing indicator and response. 
+   * Adds random delay before showing dots and before showing response.
+   * Default: undefined (no artificial delay, just 1s delay for typing indicator) */
+  artificialDelay?: [number, number];
+
+  /** Home page hero image URL (optional) */
+  homeImage?: string;
+
+  /** Home page title text (optional) */
+  homeTitle?: string;
+
+  /** Home page description text (optional) */
+  homeDescription?: string;
+
+  /** URL to open when home page info card is clicked (optional) */
+  homeLink?: string;
+
+  /** Time in seconds before the widget auto-opens and sends a trigger message.
+   * When set, the widget will automatically open after this delay and send a hidden 
+   * message to trigger the agent. Default: undefined (never auto-opens) */
+  timeToOpen?: number;
+
+  /** URL for the LiveKit token endpoint (e.g., 'https://your-app.com/api/token').
+   * Required for voice mode to work. */
+  voiceTokenUrl?: string;
+
+  /** Agent name for voice mode dispatch. Default: 'voice-agent' */
+  voiceAgentName?: string;
+
+  /** Enable voice mode (audio button in input). Default: false */
+  enableVoiceMode?: boolean;
+
+  /** Show the collapse button (circle with down arrow) when widget is open. Default: true */
+  showCollapseButton?: boolean;
+
   /** Override agent name */
   agentName?: string;
 
+  /** Override agent role (e.g., "AI Agent", "Support Bot") */
+  agentRole?: string;
+
+  /** Description shown below agent name in header (e.g., "The team can also help") */
+  headerSubtitle?: string;
+
   /** Override agent logo URL */
   agentLogoUrl?: string;
+
+  /** Agent name font size in pixels (default: 16) */
+  agentNameFontSize?: number;
+
+  /** Custom icon for the toggle button (when closed). Can be a URL or React node */
+  toggleIcon?: string | React.ReactNode;
 
   /** Override welcome message */
   welcomeMessage?: string;
 
   /** Override branding visibility */
   showBranding?: boolean;
+
+  /** Widget width in pixels (default: 420) */
+  width?: number;
+
+  /** Widget height in pixels (default: 720) */
+  height?: number;
+
+  /** Expanded widget width in pixels (default: 640) */
+  expandedWidth?: number;
+
+  /** Expanded widget height in pixels (default: 800) */
+  expandedHeight?: number;
+
+  /** Message font size in pixels (default: 15) */
+  messageFontSize?: number;
+
+  /** Theme: 'light' (default), 'dark', or 'granite' */
+  theme?: ChatWidgetTheme;
 
   /** Custom CSS class */
   className?: string;

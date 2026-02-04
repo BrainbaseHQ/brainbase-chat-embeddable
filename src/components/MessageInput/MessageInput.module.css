@@ -6,9 +6,9 @@
 
 .inputContainer {
   display: flex;
-  align-items: flex-end;
+  flex-direction: column;
   gap: var(--bb-spacing-sm);
-  padding: var(--bb-spacing-sm) var(--bb-spacing-md);
+  padding: var(--bb-spacing-md) var(--bb-spacing-lg);
   background: var(--bb-surface-secondary);
   border-radius: var(--bb-radius-xl);
   border: 1px solid var(--bb-border-color);
@@ -16,12 +16,12 @@
 }
 
 .inputContainer:focus-within {
-  border-color: var(--bb-accent-color);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  border-color: var(--bb-focus-color, var(--bb-accent-color));
+  box-shadow: 0 0 0 3px var(--bb-focus-shadow, rgba(99, 102, 241, 0.1));
 }
 
 .textarea {
-  flex: 1;
+  width: 100%;
   border: none;
   background: transparent;
   resize: none;
@@ -29,7 +29,7 @@
   font-size: var(--bb-font-size-md);
   line-height: var(--bb-line-height);
   color: var(--bb-text-primary);
-  padding: var(--bb-spacing-sm) 0;
+  padding: 0;
   min-height: 24px;
   max-height: 150px;
 }
@@ -47,33 +47,85 @@
   cursor: not-allowed;
 }
 
+/* Bottom row with icons and send button */
+.inputActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.actionIcons {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-spacing-xs);
+}
+
+.iconButton {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--bb-radius-md);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bb-text-tertiary);
+  transition: color var(--bb-transition-fast), background var(--bb-transition-fast);
+}
+
+.iconButton:hover:not(:disabled) {
+  color: var(--bb-text-secondary);
+  background: var(--bb-surface-tertiary);
+}
+
+.iconButton:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.iconButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.iconButton svg {
+  width: 20px;
+  height: 20px;
+}
+
 .sendButton {
   flex-shrink: 0;
   width: 36px;
   height: 36px;
   border-radius: var(--bb-radius-full);
-  background: var(--bb-primary-color);
+  background: var(--bb-accent-color-custom, var(--bb-primary-color));
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--bb-text-inverse);
-  transition: background var(--bb-transition-fast), transform var(--bb-transition-fast);
+  transition: background var(--bb-transition-fast), transform var(--bb-transition-fast), opacity var(--bb-transition-fast), filter var(--bb-transition-fast);
 }
 
 .sendButton:hover:not(:disabled) {
-  background: var(--bb-primary-hover);
+  filter: brightness(0.9);
   transform: scale(1.05);
 }
 
 .sendButton:active:not(:disabled) {
-  transform: scale(0.98);
+  transform: scale(0.95);
 }
 
 .sendButton:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+/* Audio button state (when input is empty) */
+.sendButton.audioButton {
+  opacity: 1;
+  cursor: pointer;
 }
 
 .sendButton:focus-visible {
@@ -86,20 +138,7 @@
   height: 18px;
 }
 
-.hint {
-  margin-top: var(--bb-spacing-sm);
-  font-size: var(--bb-font-size-xs);
-  color: var(--bb-text-tertiary);
-  text-align: center;
+.sendButton svg.audioIcon {
+  width: 22px;
+  height: 22px;
 }
-
-.hint kbd {
-  display: inline-block;
-  padding: 2px 6px;
-  font-family: var(--bb-font-family);
-  font-size: var(--bb-font-size-xs);
-  background: var(--bb-surface-tertiary);
-  border-radius: 4px;
-  border: 1px solid var(--bb-border-color);
-}
-

@@ -18,6 +18,8 @@ interface UseChatOptions {
   config: DeploymentConfig;
   apiClient: BrainbaseAPIClient | MockAPIClient;
   mockMode?: boolean;
+  streamMessages?: boolean;
+  artificialDelay?: [number, number];
   onSessionStart?: (sessionId: string) => void;
   onSessionEnd?: (session: Session) => void;
   onMessage?: (message: Message) => void;
@@ -28,9 +30,11 @@ export interface UseChatReturn {
   messages: Message[];
   toolCalls: ToolCall[];
   isLoading: boolean;
+  showTypingIndicator: boolean;
   error: Error | null;
   sessionId: string | null;
   sendMessage: (content: string) => Promise<void>;
+  sendTriggerMessage: () => Promise<void>;
   endSession: () => Promise<void>;
   clearMessages: () => void;
   startNewSession: () => Promise<string>;
@@ -41,6 +45,8 @@ export function useChat(options: UseChatOptions): UseChatReturn {
     config,
     apiClient,
     mockMode,
+    streamMessages = false,
+    artificialDelay,
     onSessionStart,
     onSessionEnd,
     onMessage,
@@ -50,12 +56,22 @@ export function useChat(options: UseChatOptions): UseChatReturn {
   const [messages, setMessages] = useState<Message[]>([]);
   const [toolCalls, setToolCalls] = useState<ToolCall[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showTypingIndicator, setShowTypingIndicator] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
 
   const sessionStartTime = useRef<number>(0);
   const isInitialized = useRef(false);
   const streamBuffers = useRef<Record<string, string>>({});
+  const typingIndicatorTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const responseDelayTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Helper to get random delay from artificial delay range (in ms)
+  const getRandomDelay = useCallback(() => {
+    if (!artificialDelay) return 0;
+    const [min, max] = artificialDelay;
+    return (min + Math.random() * (max - min)) * 1000; // Convert seconds to ms
+  }, [artificialDelay]);
 
   // Initialize or restore session
   useEffect(() => {
@@ -100,13 +116,13 @@ export function useChat(options: UseChatOptions): UseChatReturn {
     return '';
   }, [config.embedId]);
 
-  const upsertAssistantMessage = useCallback((messageId: string, content: string) => {
+  const addMessageToState = useCallback((messageId: string, content: string, status: 'streaming' | 'sent') => {
     setMessages((prev) => {
       let found = false;
       const next = prev.map((m) => {
         if (m.id === messageId) {
           found = true;
-          return { ...m, content, status: 'streaming' as const };
+          return { ...m, content, status };
         }
         return m;
       });
@@ -117,13 +133,34 @@ export function useChat(options: UseChatOptions): UseChatReturn {
           role: 'assistant',
           content,
           timestamp: Date.now(),
-          status: 'streaming',
+          status,
         });
       }
 
       return next;
     });
   }, []);
+
+  const upsertAssistantMessage = useCallback((messageId: string, content: string, forceAdd = false) => {
+    // In non-streaming mode, we don't update the UI until the message is complete
+    if (!streamMessages && !forceAdd) {
+      // Just buffer the content, don't update messages yet
+      return;
+    }
+    
+    if (forceAdd && artificialDelay) {
+      // Apply artificial delay before showing the complete message
+      const responseDelay = getRandomDelay();
+      if (responseDelayTimeoutRef.current) {
+        clearTimeout(responseDelayTimeoutRef.current);
+      }
+      responseDelayTimeoutRef.current = setTimeout(() => {
+        addMessageToState(messageId, content, 'sent');
+      }, responseDelay);
+    } else {
+      addMessageToState(messageId, content, forceAdd ? 'sent' : 'streaming');
+    }
+  }, [streamMessages, artificialDelay, getRandomDelay, addMessageToState]);
 
   const handleSSEEvent = useCallback(
     (event: SSEEvent, messageId: string, updateSessionId: (id: string) => void) => {
@@ -215,14 +252,31 @@ export function useChat(options: UseChatOptions): UseChatReturn {
         }
         case 'done': {
           // Stream complete
-          setMessages((prev) =>
-            prev.map((m) => (m.id === messageId ? { ...m, status: 'sent' as const } : m))
-          );
+          if (!streamMessages) {
+            // In non-streaming mode, add the complete message now
+            const finalContent = streamBuffers.current[messageId] ?? '';
+            if (finalContent) {
+              upsertAssistantMessage(messageId, finalContent, true);
+            }
+          } else {
+            // In streaming mode, just mark as sent
+            setMessages((prev) =>
+              prev.map((m) => (m.id === messageId ? { ...m, status: 'sent' as const } : m))
+            );
+          }
           delete streamBuffers.current[messageId];
           break;
         }
         case 'completed': {
           // Conversation ended by agent
+          if (!streamMessages) {
+            // In non-streaming mode, add the complete message now
+            const finalContent = streamBuffers.current[messageId] ?? '';
+            if (finalContent) {
+              upsertAssistantMessage(messageId, finalContent, true);
+            }
+          }
+          
           setMessages((prev) => {
             const updatedMessages = prev.map((m) =>
               m.id === messageId ? { ...m, status: 'sent' as const } : m
@@ -262,7 +316,7 @@ export function useChat(options: UseChatOptions): UseChatReturn {
         }
       }
     },
-    [config, sessionId, onSessionStart, upsertAssistantMessage]
+    [config, sessionId, streamMessages, onSessionStart, upsertAssistantMessage]
   );
 
   const processSSEStream = useCallback(
@@ -321,19 +375,32 @@ export function useChat(options: UseChatOptions): UseChatReturn {
       setMessages((prev) => [...prev, userMessage]);
       onMessage?.(userMessage);
 
-      // Create placeholder for assistant response
+      // Create placeholder for assistant response (only in streaming mode)
       const assistantMessageId = `assistant-${Date.now()}`;
-      const assistantMessage: Message = {
-        id: assistantMessageId,
-        role: 'assistant',
-        content: '',
-        timestamp: Date.now(),
-        status: 'streaming',
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
+      if (streamMessages) {
+        const assistantMessage: Message = {
+          id: assistantMessageId,
+          role: 'assistant',
+          content: '',
+          timestamp: Date.now(),
+          status: 'streaming',
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+      }
 
       setIsLoading(true);
       setError(null);
+      
+      // Clear any existing typing indicator timeout
+      if (typingIndicatorTimeoutRef.current) {
+        clearTimeout(typingIndicatorTimeoutRef.current);
+      }
+      
+      // Start typing indicator after 1 second delay (+ artificial delay if set)
+      const typingDelay = 1000 + getRandomDelay();
+      typingIndicatorTimeoutRef.current = setTimeout(() => {
+        setShowTypingIndicator(true);
+      }, typingDelay);
 
       // Create a callback to update session ID when received from server
       const updateSessionId = (newSessionId: string) => {
@@ -357,29 +424,39 @@ export function useChat(options: UseChatOptions): UseChatReturn {
           await processSSEStream(stream, assistantMessageId, updateSessionId);
         }
 
-        // Mark as sent if still streaming
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === assistantMessageId && m.status === 'streaming'
-              ? { ...m, status: 'sent' }
-              : m
-          )
-        );
+        // Mark as sent if still streaming (only in streaming mode)
+        if (streamMessages) {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMessageId && m.status === 'streaming'
+                ? { ...m, status: 'sent' }
+                : m
+            )
+          );
+        }
       } catch (err) {
         const error =
           err instanceof Error ? err : new Error('Failed to send message');
         setError(error);
         onError?.(error);
 
-        // Mark message as error
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === assistantMessageId
-              ? { ...m, status: 'error', content: 'Failed to get response' }
-              : m
-          )
-        );
+        // Mark message as error (only if message exists in streaming mode)
+        if (streamMessages) {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMessageId
+                ? { ...m, status: 'error', content: 'Failed to get response' }
+                : m
+            )
+          );
+        }
       } finally {
+        // Clear typing indicator timeout if still pending
+        if (typingIndicatorTimeoutRef.current) {
+          clearTimeout(typingIndicatorTimeoutRef.current);
+          typingIndicatorTimeoutRef.current = null;
+        }
+        setShowTypingIndicator(false);
         setIsLoading(false);
       }
     },
@@ -387,10 +464,116 @@ export function useChat(options: UseChatOptions): UseChatReturn {
       sessionId,
       apiClient,
       mockMode,
+      streamMessages,
+      getRandomDelay,
       config.embedId,
       handleSSEEvent,
       processSSEStream,
       onMessage,
+      onError,
+    ]
+  );
+
+  // Send a trigger message to start the conversation without showing a user message
+  const sendTriggerMessage = useCallback(
+    async (): Promise<void> => {
+      // Create placeholder for assistant response (only in streaming mode)
+      const assistantMessageId = `assistant-${Date.now()}`;
+      if (streamMessages) {
+        const assistantMessage: Message = {
+          id: assistantMessageId,
+          role: 'assistant',
+          content: '',
+          timestamp: Date.now(),
+          status: 'streaming',
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+      }
+
+      setIsLoading(true);
+      setError(null);
+      
+      // Clear any existing typing indicator timeout
+      if (typingIndicatorTimeoutRef.current) {
+        clearTimeout(typingIndicatorTimeoutRef.current);
+      }
+      
+      // Start typing indicator after 1 second delay (+ artificial delay if set)
+      const typingDelay = 1000 + getRandomDelay();
+      typingIndicatorTimeoutRef.current = setTimeout(() => {
+        setShowTypingIndicator(true);
+      }, typingDelay);
+
+      // Create a callback to update session ID when received from server
+      const updateSessionId = (newSessionId: string) => {
+        setSessionId(newSessionId);
+      };
+
+      try {
+        // Send an empty/trigger message - the backend should handle this as a conversation starter
+        const triggerContent = '';
+        
+        if (mockMode) {
+          // Handle AsyncGenerator (mock mode)
+          const generator = (apiClient as MockAPIClient).sendMessage(triggerContent);
+          for await (const event of generator) {
+            handleSSEEvent(event, assistantMessageId, updateSessionId);
+          }
+        } else {
+          // Handle ReadableStream (real API)
+          const stream = await (apiClient as BrainbaseAPIClient).sendMessage({
+            embedId: config.embedId,
+            message: triggerContent,
+            sessionId: sessionId ?? undefined,
+          });
+          await processSSEStream(stream, assistantMessageId, updateSessionId);
+        }
+
+        // Mark as sent if still streaming (only in streaming mode)
+        if (streamMessages) {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMessageId && m.status === 'streaming'
+                ? { ...m, status: 'sent' }
+                : m
+            )
+          );
+        }
+      } catch (err) {
+        const error =
+          err instanceof Error ? err : new Error('Failed to send message');
+        setError(error);
+        onError?.(error);
+
+        // Mark message as error (only if message exists in streaming mode)
+        if (streamMessages) {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMessageId
+                ? { ...m, status: 'error', content: 'Failed to get response' }
+                : m
+            )
+          );
+        }
+      } finally {
+        // Clear typing indicator timeout if still pending
+        if (typingIndicatorTimeoutRef.current) {
+          clearTimeout(typingIndicatorTimeoutRef.current);
+          typingIndicatorTimeoutRef.current = null;
+        }
+        setShowTypingIndicator(false);
+        setIsLoading(false);
+      }
+    },
+    [
+      sessionId,
+      apiClient,
+      mockMode,
+      streamMessages,
+      getRandomDelay,
+      config.embedId,
+      handleSSEEvent,
+      processSSEStream,
       onError,
     ]
   );
@@ -434,9 +617,11 @@ export function useChat(options: UseChatOptions): UseChatReturn {
     messages,
     toolCalls,
     isLoading,
+    showTypingIndicator,
     error,
     sessionId,
     sendMessage,
+    sendTriggerMessage,
     endSession: endCurrentSession,
     clearMessages,
     startNewSession,

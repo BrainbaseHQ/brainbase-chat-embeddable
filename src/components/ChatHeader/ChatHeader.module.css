@@ -1,6 +1,6 @@
 .header {
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   /* Smooth transition with better easing */
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -20,24 +20,23 @@
 .headerBackground {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    135deg,
-    var(--bb-primary-color) 0%,
-    color-mix(in srgb, var(--bb-primary-color) 70%, #2d2d5a) 50%,
-    color-mix(in srgb, var(--bb-primary-color) 50%, #1a1a2e) 100%
-  );
+  background: var(--bb-primary-color);
   transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Gradient overlay - only shown when primaryGradient is enabled */
 .headerBackground::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(
-    ellipse at 30% 20%,
-    rgba(255, 255, 255, 0.08) 0%,
-    transparent 50%
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    color-mix(in srgb, var(--bb-primary-color) 70%, #2d2d5a) 50%,
+    color-mix(in srgb, var(--bb-primary-color) 50%, #1a1a2e) 100%
   );
+  opacity: var(--bb-primary-gradient, 0);
+  transition: opacity 0.3s ease;
 }
 
 .headerBackground::after {
@@ -48,7 +47,7 @@
   right: 0;
   height: 60px;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.1), transparent);
-  opacity: 1;
+  opacity: var(--bb-primary-gradient, 0);
   transition: opacity 0.3s ease;
 }
 
@@ -83,41 +82,39 @@
 }
 
 .agentLogo {
-  border-radius: var(--bb-radius-md);
+  border-radius: var(--bb-radius-sm);
   object-fit: cover;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .header:not(.compact) .agentLogo {
+  width: 42px;
+  height: 42px;
+}
+
+.compact .agentLogo {
   width: 36px;
   height: 36px;
 }
 
-.compact .agentLogo {
-  width: 32px;
-  height: 32px;
-}
-
 .agentLogoPlaceholder {
-  border-radius: var(--bb-radius-md);
-  background: var(--bb-primary-color);
+  border-radius: var(--bb-radius-sm);
+  background: var(--bb-accent-color-custom, var(--bb-primary-color));
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--bb-text-inverse);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .header:not(.compact) .agentLogoPlaceholder {
-  width: 36px;
-  height: 36px;
+  width: 42px;
+  height: 42px;
 }
 
 .compact .agentLogoPlaceholder {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
 }
 
 .brainbaseLogo {
@@ -125,20 +122,66 @@
 }
 
 .header:not(.compact) .brainbaseLogo {
+  width: 28px;
+  height: 28px;
+}
+
+.compact .brainbaseLogo {
   width: 24px;
   height: 24px;
 }
 
-.compact .brainbaseLogo {
-  width: 22px;
-  height: 22px;
+/* Back button / left chevron */
+.backButton {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--bb-radius-full);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bb-header-text-color, var(--bb-text-inverse));
+  opacity: 0.8;
+  transition: opacity var(--bb-transition-fast), transform var(--bb-transition-fast);
+  margin-right: 2px;
+  margin-left: -4px;
+}
+
+.backButton:hover {
+  opacity: 1;
+}
+
+.backButton:active {
+  transform: scale(0.9);
+}
+
+.backButton svg {
+  width: 20px;
+  height: 20px;
+}
+
+.agentTextWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
 .agentName {
-  color: var(--bb-text-inverse);
-  font-size: var(--bb-font-size-md);
+  color: var(--bb-header-text-color, var(--bb-text-inverse));
+  font-size: var(--bb-agent-name-font-size, 16px);
   font-weight: var(--bb-font-weight-semibold);
   opacity: 0.95;
+  line-height: 1.2;
+}
+
+.headerSubtitle {
+  color: var(--bb-header-text-color, var(--bb-text-inverse));
+  font-size: calc(var(--bb-agent-name-font-size, 16px) - 2px);
+  font-weight: var(--bb-font-weight-normal);
+  opacity: 0.7;
+  line-height: 1.3;
 }
 
 .actions {
@@ -150,13 +193,13 @@
   width: 32px;
   height: 32px;
   border-radius: var(--bb-radius-full);
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.1);
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--bb-text-inverse);
+  color: var(--bb-header-text-color, var(--bb-text-inverse));
   transition: background var(--bb-transition-fast), transform var(--bb-transition-fast);
 }
 
@@ -181,8 +224,8 @@
 
 /* Welcome text with smooth collapse */
 .welcomeText {
-  color: var(--bb-text-inverse);
-  overflow: hidden;
+  color: var(--bb-header-text-color, var(--bb-text-inverse));
+  overflow: visible;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -214,3 +257,78 @@
   line-height: 1.2;
 }
 
+/* Menu container for dropdown positioning */
+.menuContainer {
+  position: relative;
+}
+
+/* Dropdown menu */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 180px;
+  background: var(--bb-surface-bg);
+  border-radius: var(--bb-radius-md);
+  box-shadow: var(--bb-shadow-lg);
+  padding: var(--bb-spacing-xs);
+  z-index: 9999;
+  animation: dropdownSlideIn 0.15s ease;
+}
+
+@keyframes dropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-spacing-sm);
+  width: 100%;
+  padding: var(--bb-spacing-sm) var(--bb-spacing-md);
+  background: transparent;
+  border: none;
+  border-radius: var(--bb-radius-sm);
+  cursor: pointer;
+  font-family: var(--bb-font-family);
+  font-size: var(--bb-font-size-sm);
+  font-weight: var(--bb-font-weight-medium);
+  color: var(--bb-text-primary);
+  text-align: left;
+  white-space: nowrap;
+  transition: background var(--bb-transition-fast);
+}
+
+.dropdownItem:hover {
+  background: var(--bb-surface-secondary);
+}
+
+.dropdownItem:active {
+  background: var(--bb-surface-tertiary);
+}
+
+/* Explicitly size SVG icons in dropdown items */
+.dropdownItem svg {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
+  flex-shrink: 0;
+  color: var(--bb-text-secondary);
+}
+
+.dropdownIcon {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
+  flex-shrink: 0;
+  color: var(--bb-text-secondary);
+}

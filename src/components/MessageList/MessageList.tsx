@@ -9,7 +9,9 @@ export interface MessageListProps {
   messages: MessageType[];
   toolCalls?: ToolCall[];
   isLoading: boolean;
+  showTypingIndicator?: boolean;
   agentName?: string;
+  agentRole?: string;
   agentLogoUrl?: string;
 }
 
@@ -17,21 +19,29 @@ export const MessageList: React.FC<MessageListProps> = ({
   messages,
   toolCalls = [],
   isLoading,
+  showTypingIndicator = false,
   agentName,
+  agentRole,
   agentLogoUrl,
 }) => {
+  // Find the last assistant message index
+  const lastAssistantMessageIndex = messages.reduce((lastIndex, msg, index) => {
+    return msg.role === 'assistant' ? index : lastIndex;
+  }, -1);
   const listRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const prevMessageCountRef = useRef(messages.length);
   const prevToolCallCountRef = useRef(toolCalls.length);
 
-  // Auto-scroll to bottom only when new messages/tool calls are added
-  // Using scrollTop instead of scrollIntoView to avoid scrolling parent containers
+  // Auto-scroll to bottom when:
+  // - New messages are added (user sends or agent responds)
+  // - Typing indicator appears
+  // - Tool calls are added
   useEffect(() => {
     const hasNewMessages = messages.length > prevMessageCountRef.current;
     const hasNewToolCalls = toolCalls.length > prevToolCallCountRef.current;
     
-    if (hasNewMessages || hasNewToolCalls || (isLoading && messages.length > 0)) {
+    if (hasNewMessages || hasNewToolCalls || showTypingIndicator) {
       const list = listRef.current;
       if (list) {
         list.scrollTo({
@@ -43,7 +53,7 @@ export const MessageList: React.FC<MessageListProps> = ({
     
     prevMessageCountRef.current = messages.length;
     prevToolCallCountRef.current = toolCalls.length;
-  }, [messages.length, toolCalls.length, isLoading]);
+  }, [messages.length, toolCalls.length, showTypingIndicator]);
 
   // Filter tool calls that are currently executing
   const activeToolCalls = toolCalls.filter(
@@ -69,12 +79,13 @@ export const MessageList: React.FC<MessageListProps> = ({
         </div>
       )}
 
-      {messages.map((message) => (
+      {messages.map((message, index) => (
         <Message
           key={message.id}
           message={message}
           agentName={agentName}
-          agentLogoUrl={agentLogoUrl}
+          agentRole={agentRole}
+          isLastAssistantMessage={index === lastAssistantMessageIndex}
         />
       ))}
 
@@ -82,7 +93,7 @@ export const MessageList: React.FC<MessageListProps> = ({
         <ToolCallDisplay key={toolCall.id} toolCall={toolCall} />
       ))}
 
-      {isLoading && messages[messages.length - 1]?.role === 'user' && (
+      {showTypingIndicator && (
         <TypingIndicator agentName={agentName} agentLogoUrl={agentLogoUrl} />
       )}
 
