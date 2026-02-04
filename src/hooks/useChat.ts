@@ -63,9 +63,8 @@ export function useChat(options: UseChatOptions): UseChatReturn {
   const sessionStartTime = useRef<number>(0);
   const isInitialized = useRef(false);
   const streamBuffers = useRef<Record<string, string>>({});
-  const typingIndicatorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const responseDelayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const pendingResponseRef = useRef<{ messageId: string; content: string } | null>(null);
+  const typingIndicatorTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const responseDelayTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Helper to get random delay from artificial delay range (in ms)
   const getRandomDelay = useCallback(() => {
