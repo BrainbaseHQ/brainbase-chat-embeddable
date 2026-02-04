@@ -29,9 +29,27 @@ class ChatWidgetElement extends HTMLElement {
       'position',
       'primary-color',
       'agent-name',
+      'agent-role',
       'welcome-message',
       'api-base-url',
       'default-open',
+      'toggle-icon',
+      'width',
+      'height',
+      'message-font-size',
+      'theme',
+      'header-subtitle',
+      'agent-name-font-size',
+      'accent-color',
+      'primary-gradient',
+      'accent-gradient',
+      'header-text-color',
+      'stream-messages',
+      'artificial-delay',
+      'home-image',
+      'home-title',
+      'home-description',
+      'time-to-open',
     ];
   }
 
@@ -86,15 +104,59 @@ class ChatWidgetElement extends HTMLElement {
   }
 
   private getProps(): ChatWidgetProps {
+    const widthAttr = this.getAttribute('width');
+    const heightAttr = this.getAttribute('height');
+    const messageFontSizeAttr = this.getAttribute('message-font-size');
+    const agentNameFontSizeAttr = this.getAttribute('agent-name-font-size');
+    const timeToOpenAttr = this.getAttribute('time-to-open');
+    
     return {
       embedId: this.getAttribute('embed-id') || '',
       position: this.getPositionAttribute(),
       primaryColor: this.getAttribute('primary-color') || undefined,
+      accentColor: this.getAttribute('accent-color') || undefined,
+      primaryGradient: this.getAttribute('primary-gradient') === 'true',
+      accentGradient: this.getAttribute('accent-gradient') === 'true',
+      headerTextColor: this.getAttribute('header-text-color') || undefined,
+      streamMessages: this.getAttribute('stream-messages') === 'true',
+      artificialDelay: this.getArtificialDelayAttribute(),
+      homeImage: this.getAttribute('home-image') || undefined,
+      homeTitle: this.getAttribute('home-title') || undefined,
+      homeDescription: this.getAttribute('home-description') || undefined,
+      timeToOpen: timeToOpenAttr ? parseFloat(timeToOpenAttr) : undefined,
       agentName: this.getAttribute('agent-name') || undefined,
+      agentRole: this.getAttribute('agent-role') || undefined,
+      headerSubtitle: this.getAttribute('header-subtitle') || undefined,
       welcomeMessage: this.getAttribute('welcome-message') || undefined,
       apiBaseUrl: this.getAttribute('api-base-url') || undefined,
       defaultOpen: this.getAttribute('default-open') === 'true',
+      toggleIcon: this.getAttribute('toggle-icon') || undefined,
+      width: widthAttr ? parseInt(widthAttr, 10) : undefined,
+      height: heightAttr ? parseInt(heightAttr, 10) : undefined,
+      messageFontSize: messageFontSizeAttr ? parseInt(messageFontSizeAttr, 10) : undefined,
+      agentNameFontSize: agentNameFontSizeAttr ? parseInt(agentNameFontSizeAttr, 10) : undefined,
+      theme: this.getThemeAttribute(),
     };
+  }
+
+  private getThemeAttribute(): 'light' | 'dark' | 'granite' | undefined {
+    const theme = this.getAttribute('theme');
+    if (theme === 'dark' || theme === 'granite' || theme === 'light') {
+      return theme;
+    }
+    return undefined;
+  }
+
+  private getArtificialDelayAttribute(): [number, number] | undefined {
+    const delay = this.getAttribute('artificial-delay');
+    if (!delay) return undefined;
+    
+    // Support formats: "10,50" or "10-50"
+    const parts = delay.split(/[,\-]/).map(s => parseFloat(s.trim()));
+    if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+      return [parts[0], parts[1]];
+    }
+    return undefined;
   }
 
   private getPositionAttribute(): 'bottom-right' | 'bottom-left' | 'inline' {

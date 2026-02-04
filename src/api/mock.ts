@@ -12,6 +12,7 @@ const DEFAULT_MOCK_CONFIG: DeploymentConfig = {
   flowId: 'mock-flow-id',
   // Note: welcomeMessage is handled by the engine, not the widget
   agentName: 'AI Assistant',
+  agentRole: 'AI Agent',
   agentLogoUrl: undefined,
   primaryColor: '#1a1a2e',
   styling: {},
