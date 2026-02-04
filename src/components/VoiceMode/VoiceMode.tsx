@@ -2,10 +2,17 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Room, RoomEvent, Track } from 'livekit-client';
 import styles from './VoiceMode.module.css';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// THREE.js and GSAP are loaded dynamically from CDN, so we use 'any' for their types
+type ThreeJS = any;
+type GSAP = any;
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
 declare global {
   interface Window {
-    THREE: any;
-    gsap: any;
+    THREE: ThreeJS;
+    gsap: GSAP;
+    webkitAudioContext: typeof AudioContext;
   }
 }
 
@@ -35,10 +42,12 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({
   const localDataArrayRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
   const remoteDataArrayRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
   const smoothedAmplitudeRef = useRef(0);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const materialRef = useRef<any>(null);
   const sceneInitializedRef = useRef(false);
   const morphTargetRef = useRef(0);
   const currentMorphRef = useRef(0);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rendererRef = useRef<any>(null);
 
   const getAmplitude = useCallback(() => {
@@ -62,9 +71,10 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({
     return smoothedAmplitudeRef.current;
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const setupLocalAudioAnalyser = async (track: any) => {
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
     }
 
     if (audioContextRef.current.state === 'suspended') {
@@ -78,14 +88,15 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({
       localAnalyserRef.current.fftSize = 256;
       source.connect(localAnalyserRef.current);
       localDataArrayRef.current = new Uint8Array(localAnalyserRef.current.frequencyBinCount);
-    } catch (e) {
-      console.error('Failed to set up local audio analyser:', e);
+    } catch (err) {
+      console.error('Failed to set up local audio analyser:', err);
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const setupRemoteAudioAnalyser = async (track: any) => {
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
     }
 
     if (audioContextRef.current.state === 'suspended') {
@@ -100,7 +111,7 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({
 
     try {
       await audioEl.play();
-    } catch (e) {
+    } catch {
       console.log('Audio play failed, will retry on interaction');
     }
 
@@ -413,13 +424,14 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({
     setStatus('');
 
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
     }
     if (audioContextRef.current.state === 'suspended') {
       await audioContextRef.current.resume();
     }
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const body: any = {};
       if (agentName && agentName.trim()) {
         body.room_config = {
@@ -494,7 +506,7 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({
           setupLocalAudioAnalyser(pub.track);
         }
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error('Connection failed:', error);
       setStatus('Connection failed');
       setIsConnecting(false);
@@ -505,7 +517,7 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({
     if (roomRef.current) {
       try {
         await roomRef.current.localParticipant.setMicrophoneEnabled(false);
-      } catch (e) {
+      } catch {
         // Ignore errors
       }
       roomRef.current.disconnect(true);

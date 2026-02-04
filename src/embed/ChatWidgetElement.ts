@@ -162,7 +162,7 @@ class ChatWidgetElement extends HTMLElement {
     if (!delay) return undefined;
     
     // Support formats: "10,50" or "10-50"
-    const parts = delay.split(/[,\-]/).map(s => parseFloat(s.trim()));
+    const parts = delay.split(/[,-]/).map(s => parseFloat(s.trim()));
     if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
       return [parts[0], parts[1]];
     }
