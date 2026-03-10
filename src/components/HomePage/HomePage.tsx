@@ -12,6 +12,7 @@ export interface HomePageProps {
   onStartChat: () => void;
   onNavigate: (page: 'home' | 'messages') => void;
   currentPage: 'home' | 'messages';
+  onClose?: () => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
@@ -24,6 +25,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   onStartChat,
   onNavigate,
   currentPage,
+  onClose,
 }) => {
   const handleHomeCardClick = () => {
     if (homeLink) {
@@ -36,15 +38,35 @@ export const HomePage: React.FC<HomePageProps> = ({
       <div className={styles.header}>
         <div className={styles.headerBackground} />
         <div className={styles.headerContent}>
-          <div className={styles.agentInfo}>
-            {agentLogoUrl ? (
-              <img src={agentLogoUrl} alt={agentName} className={styles.headerLogo} />
-            ) : (
-              <div className={styles.headerLogoPlaceholder}>
-                <BrainbaseLogo className={styles.headerBrainbaseLogo} color="white" cutoutColor="var(--bb-primary-color)" />
-              </div>
+          <div className={styles.headerTopRow}>
+            <div className={styles.agentInfo}>
+              {agentLogoUrl ? (
+                <img src={agentLogoUrl} alt={agentName} className={styles.headerLogo} />
+              ) : (
+                <div className={styles.headerLogoPlaceholder}>
+                  <BrainbaseLogo className={styles.headerBrainbaseLogo} color="white" cutoutColor="var(--bb-primary-color)" />
+                </div>
+              )}
+              <span className={styles.headerAgentName}>{agentName}</span>
+            </div>
+            {onClose && (
+              <button
+                className={styles.closeButton}
+                onClick={onClose}
+                aria-label="Close chat"
+                type="button"
+              >
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M6 18L18 6M6 6L18 18"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
             )}
-            <span className={styles.headerAgentName}>{agentName}</span>
           </div>
         </div>
       </div>
