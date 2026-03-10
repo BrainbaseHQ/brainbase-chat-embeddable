@@ -325,6 +325,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
               onStartChat={handleStartChat}
               onNavigate={handleNavigate}
               currentPage="home"
+              onClose={isInline ? undefined : handleClose}
             />
           ) : (
             <ChatContainer
